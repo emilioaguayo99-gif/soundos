@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SoundOS Music Player - Official YouTube API</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              red: '#ED1C24',
+              dark: '#09090b',
+              'dark-elevated': '#121215',
+              'dark-input': '#18181b',
+              'text-primary': '#FFFFFF',
+              'text-secondary': '#A1A1AA',
+              'text-tertiary': '#71717A'
+            }
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-brand-dark text-brand-text-primary font-sans h-screen flex flex-col overflow-hidden select-none">
+
+  <!-- Reproductor iFrame de YouTube Oculto -->
+  <div class="hidden"><div id="youtube-player"></div></div>
+
+  <div class="flex flex-1 overflow-hidden">
+    <!-- BARRA LATERAL -->
+    <aside class="w-64 p-6 bg-black flex flex-col border-r border-zinc-900 flex-shrink-0">
+      <div class="flex items-center gap-2 mb-8">
+        <i data-lucide="music-4" class="w-7 h-7 text-brand-red"></i>
+        <h1 class="text-2xl font-black text-brand-red tracking-tight">SOUND<span class="text-white">OS</span></h1>
+      </div>
+      <nav class="space-y-4">
+        <a href="#" class="flex items-center gap-4 text-brand-red font-semibold">
+          <i data-lucide="home" class="w-5 h-5"></i> Inicio
+        </a>
+        <a href="#" class="flex items-center gap-4 text-brand-text-secondary hover:text-white transition">
+          <i data-lucide="compass" class="w-5 h-5"></i> Explorar
+        </a>
+        <a href="#" class="flex items-center gap-4 text-brand-text-secondary hover:text-white transition">
+          <i data-lucide="library" class="w-5 h-5"></i> Mi Colección
+        </a>
+      </nav>
+      <div class="mt-auto space-y-4">
+        <a href="#" class="flex items-center gap-4 text-brand-text-secondary hover:text-white transition text-sm">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i> Crear Playlist
+        </a>
+      </div>
+    </aside>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="flex-1 p-8 overflow-y-auto pb-32">
+      <!-- BARRA DE BÚSQUEDA -->
+      <header class="flex items-center gap-4 mb-8 sticky top-0 bg-brand-dark/90 backdrop-blur-md z-20 py-2">
+        <div class="relative flex-1">
+          <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-brand-text-secondary"></i>
+          <input type="text" id="search-input" placeholder="Busca cualquier canción o artista..." class="w-full pl-12 pr-4 py-2.5 bg-brand-dark-input rounded-full border border-zinc-800 focus:border-brand-red outline-none transition text-sm">
+        </div>
+        <button id="search-btn" class="bg-brand-red hover:bg-red-600 px-6 py-2.5 rounded-full text-xs font-bold transition">
+          Buscar
+        </button>
+        <button class="flex items-center gap-2 text-brand-text-secondary hover:text-white text-sm ml-2">
+          <i data-lucide="list-music" class="w-5 h-5 text-brand-red"></i>
+          <span>Cola (<span id="queue-count" class="font-bold">0</span>)</span>
+        </button>
+      </header>
+
+      <!-- BANNER SPECTRUM -->
+      <div class="relative bg-brand-dark-elevated p-8 rounded-2xl mb-8 border border-zinc-900 overflow-hidden">
+        <div class="relative z-10">
+          <div class="flex items-center gap-2 mb-2">
+            <span class="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
+            <span id="status-indicator" class="text-xs uppercase font-bold text-brand-text-tertiary tracking-wider">En Espera</span>
+          </div>
+          <h2 class="text-3xl font-extrabold text-white tracking-tight">SoundOS Spectrum</h2>
+          <p class="text-brand-text-secondary text-sm max-w-lg mt-1">Busca cualquier canción por su título y cantante para escucharla gratis inmediatamente.</p>
+        </div>
+      </div>
+
+      <!-- SECCIÓN DE RESULTADOS / SUGERENCIAS -->
+      <div class="flex flex-col lg:flex-row gap-8">
+        <div class="flex-1 space-y-8">
+          <!-- TOP 5 CANCIONES -->
+          <div>
+            <h3 class="text-xs font-bold text-brand-text-tertiary tracking-wider uppercase mb-4">Top 5 Canciones Más Famosas</h3>
+            <div id="top-songs-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <p class="text-sm text-brand-text-tertiary col-span-2">Usa el buscador para cargar canciones del artista.</p>
+            </div>
+          </div>
+
+          <!-- ÁLBUMES Y EP -->
+          <div>
+            <h3 class="text-xs font-bold text-brand-text-tertiary tracking-wider uppercase mb-4">Álbumes y Playlists</h3>
+            <div id="albums-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+              <p class="text-sm text-brand-text-tertiary col-span-full">Los álbumes relacionados aparecerán aquí.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- COLA Y PLAYLISTS -->
+        <div class="w-full lg:w-72 space-y-6 flex-shrink-0">
+          <h3 class="text-lg font-bold">Tus Playlists y Cola</h3>
+          <div id="queue-list" class="space-y-3 max-h-96 overflow-y-auto pr-1">
+            <p class="text-sm text-brand-text-tertiary">No hay canciones en la cola.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- BARRA DE REPRODUCCIÓN INFERIOR -->
+  <footer class="fixed bottom-0 left-0 right-0 h-24 bg-zinc-950 p-4 border-t border-zinc-900 flex flex-col justify-between z-50">
+    <div class="flex items-center justify-between gap-4">
+      <!-- INFO CANCIÓN ACTUAL -->
+      <div class="flex items-center gap-3 w-1/4">
+        <img id="current-thumb" src="https://via.placeholder.com/40" class="w-12 h-12 rounded-md object-cover bg-zinc-900">
+        <div class="truncate">
+          <h4 id="current-title" class="text-sm font-bold truncate">Selecciona una pista</h4>
+          <p id="current-artist" class="text-xs text-brand-text-secondary truncate">SoundOS Player</p>
+        </div>
+      </div>
+
+      <!-- CONTROLES PRINCIPALES -->
+      <div class="flex flex-col items-center gap-1.5 w-2/4 max-w-xl">
+        <div class="flex items-center gap-6">
+          <button id="prev-btn" class="text-brand-text-secondary hover:text-white transition"><i data-lucide="skip-back" class="w-5 h-5"></i></button>
+          <button id="play-btn" class="w-10 h-10 rounded-full bg-brand-red text-white flex items-center justify-center hover:scale-105 transition active:scale-95">
+            <i id="play-icon" data-lucide="play" class="w-5 h-5 fill-white"></i>
+          </button>
+          <button id="next-btn" class="text-brand-text-secondary hover:text-white transition"><i data-lucide="skip-forward" class="w-5 h-5"></i></button>
+        </div>
+
+        <!-- BARRA DE TIEMPO / ADELANTAR / ATRASAR -->
+        <div class="flex items-center gap-3 w-full text-xs text-brand-text-secondary">
+          <span id="current-time">0:00</span>
+          <input type="range" id="progress-bar" value="0" min="0" max="100" class="flex-1 accent-brand-red cursor-pointer h-1 bg-zinc-800 rounded-lg">
+          <span id="total-duration">0:00</span>
+        </div>
+      </div>
+
+      <!-- CONTROL DE VOLUMEN -->
+      <div class="flex items-center justify-end gap-2 w-1/4 text-xs text-brand-text-secondary">
+        <i data-lucide="volume-2" class="w-4 h-4"></i>
+        <input type="range" id="volume-bar" value="100" min="0" max="100" class="w-24 accent-brand-red cursor-pointer h-1 bg-zinc-800 rounded-lg">
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+
+    const YOUTUBE_API_KEY = "AIzaSyDmdwQXMXx3yi8h48KYOgLiY1l86Qm5Ick"; 
+
+    let player;
+    let queue = [];
+    let currentIndex = 0;
+    let isPlaying = false;
+    let progressTimer = null;
+
+    // Cargar API de IFrame de YouTube
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('youtube-player', {
+        height: '0', width: '0',
+        playerVars: { 'autoplay': 1, 'controls': 0 },
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function onPlayerStateChange(e) {
+      const playIcon = document.getElementById('play-icon');
+      const statusIndicator = document.getElementById('status-indicator');
+
+      if (e.data == YT.PlayerState.PLAYING) {
+        isPlaying = true;
+        playIcon.setAttribute('data-lucide', 'pause');
+        statusIndicator.textContent = "Reproduciendo";
+        startProgressLoop();
+      } else {
+        isPlaying = false;
+        playIcon.setAttribute('data-lucide', 'play');
+        if(e.data == YT.PlayerState.PAUSED) statusIndicator.textContent = "Pausado";
+        stopProgressLoop();
+      }
+      lucide.createIcons();
+    }
+
+    // BÚSQUEDA OFICIAL (Top 5 canciones + Álbumes)
+    async function searchYouTube(query) {
+      if (!query) return;
+
+      // 1. Obtener Top 5 Canciones
+      const tracksUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=${encodeURIComponent(query)}&type=video&videoCategoryId=10&key=${YOUTUBE_API_KEY}`;
+      // 2. Obtener Álbumes / Playlists
+      const albumsUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=4&q=${encodeURIComponent(query + ' album playlist')}&type=playlist&key=${YOUTUBE_API_KEY}`;
+
+      try {
+        const [resTracks, resAlbums] = await Promise.all([fetch(tracksUrl), fetch(albumsUrl)]);
+        const dataTracks = await resTracks.json();
+        const dataAlbums = await resAlbums.json();
+
+        if (dataTracks.items) renderTopSongs(dataTracks.items);
+        if (dataAlbums.items) renderAlbums(dataAlbums.items);
+      } catch (err) {
+        console.error("Error al conectar con YouTube API:", err);
+      }
+    }
+
+    function renderTopSongs(items) {
+      const grid = document.getElementById('top-songs-grid');
+      grid.innerHTML = items.map(item => {
+        const title = item.snippet.title.replace(/'/g, "");
+        const artist = item.snippet.channelTitle.replace(/'/g, "");
+        const thumb = item.snippet.thumbnails.high.url;
+        const videoId = item.id.videoId;
+
+        return `
+          <div class="bg-brand-dark-elevated p-3 rounded-xl flex items-center justify-between border border-zinc-900 hover:border-zinc-700 transition group">
+            <div class="flex items-center gap-3 truncate">
+              <img src="${thumb}" class="w-12 h-12 rounded-md object-cover">
+              <div class="truncate">
+                <p class="font-bold text-xs truncate">${item.snippet.title}</p>
+                <p class="text-[11px] text-brand-text-secondary truncate">${item.snippet.channelTitle}</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="playDirectly('${videoId}', '${title}', '${artist}', '${thumb}')" class="bg-brand-red hover:bg-red-600 text-white text-[10px] font-bold px-3 py-1.5 rounded-full transition flex items-center gap-1">
+                <i data-lucide="play" class="w-3 h-3 fill-white"></i> REPRODUCIR
+              </button>
+              <button onclick="addToQueue('${videoId}', '${title}', '${artist}', '${thumb}')" class="bg-zinc-800 hover:bg-zinc-700 text-brand-text-secondary text-[10px] font-bold px-2 py-1.5 rounded-full transition">
+                + COLA
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function renderAlbums(playlists) {
+      const grid = document.getElementById('albums-grid');
+      grid.innerHTML = playlists.map(pl => `
+        <div class="bg-brand-dark-elevated p-3 rounded-xl border border-zinc-900 hover:border-zinc-700 transition flex flex-col justify-between">
+          <img src="${pl.snippet.thumbnails.high.url}" class="w-full h-28 object-cover rounded-md mb-2">
+          <p class="font-bold text-xs truncate">${pl.snippet.title}</p>
+          <p class="text-[10px] text-brand-text-secondary mb-2">${pl.snippet.channelTitle}</p>
+          <button onclick="searchYouTube('${pl.snippet.title.replace(/'/g, "")}')" class="bg-zinc-800 hover:bg-zinc-700 text-[10px] font-bold py-1.5 rounded-md text-center transition">
+            VER PISTAS
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // REPRODUCCIÓN DIRECTA
+    function playDirectly(id, title, artist, thumb) {
+      queue.unshift({ id, title, artist, thumb });
+      currentIndex = 0;
+      updateQueueUI();
+      loadTrack(queue[0]);
+    }
+
+    function addToQueue(id, title, artist, thumb) {
+      queue.push({ id, title, artist, thumb });
+      updateQueueUI();
+      if (queue.length === 1) playDirectly(id, title, artist, thumb);
+    }
+
+    function loadTrack(track) {
+      if (!player || !track) return;
+      player.loadVideoById(track.id);
+      document.getElementById('current-title').textContent = track.title;
+      document.getElementById('current-artist').textContent = track.artist;
+      document.getElementById('current-thumb').src = track.thumb;
+    }
+
+    // BUCLE DE BARRA DE TIEMPO Y PROGRESO
+    function startProgressLoop() {
+      stopProgressLoop();
+      progressTimer = setInterval(() => {
+        if (player && player.getCurrentTime) {
+          const current = player.getCurrentTime() || 0;
+          const total = player.getDuration() || 0;
+          
+          document.getElementById('current-time').textContent = formatTime(current);
+          document.getElementById('total-duration').textContent = formatTime(total);
+
+          if (total > 0) {
+            document.getElementById('progress-bar').value = (current / total) * 100;
+          }
+        }
+      }, 1000);
+    }
+
+    function stopProgressLoop() {
+      if (progressTimer) clearInterval(progressTimer);
+    }
+
+    function formatTime(sec) {
+      const m = Math.floor(sec / 60);
+      const s = Math.floor(sec % 60);
+      return `${m}:${s < 10 ? '0' : ''}${s}`;
+    }
+
+    // ADELANTAR / ATRASAR CANCIÓN
+    document.getElementById('progress-bar').oninput = (e) => {
+      if (player && player.getDuration) {
+        const seekTo = (e.target.value / 100) * player.getDuration();
+        player.seekTo(seekTo, true);
+      }
+    };
+
+    // VOLUMEN
+    document.getElementById('volume-bar').oninput = (e) => {
+      if (player && player.setVolume) {
+        player.setVolume(e.target.value);
+      }
+    };
+
+    // BOTONES REPRODUCTOR
+    document.getElementById('play-btn').onclick = () => {
+      if (!queue.length) return;
+      if (isPlaying) player.pauseVideo(); else player.playVideo();
+    };
+
+    document.getElementById('prev-btn').onclick = () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadTrack(queue[currentIndex]);
+        updateQueueUI();
+      }
+    };
+
+    document.getElementById('next-btn').onclick = () => {
+      if (currentIndex < queue.length - 1) {
+        currentIndex++;
+        loadTrack(queue[currentIndex]);
+        updateQueueUI();
+      }
+    };
+
+    document.getElementById('search-btn').onclick = () => {
+      searchYouTube(document.getElementById('search-input').value.trim());
+    };
+
+    document.getElementById('search-input').onkeypress = (e) => {
+      if (e.key === 'Enter') document.getElementById('search-btn').click();
+    };
+
+    function updateQueueUI() {
+      document.getElementById('queue-count').textContent = queue.length;
+      const queueBox = document.getElementById('queue-list');
+      
+      if (!queue.length) {
+        queueBox.innerHTML = '<p class="text-sm text-brand-text-tertiary">No hay canciones en la cola.</p>';
+        return;
+      }
+
+      queueBox.innerHTML = queue.map((song, i) => `
+        <div onclick="currentIndex=${i}; loadTrack(queue[${i}]); updateQueueUI();" class="p-2.5 rounded-lg border ${i === currentIndex ? 'bg-brand-red/10 border-brand-red' : 'bg-brand-dark-elevated border-zinc-900'} flex items-center gap-3 cursor-pointer hover:border-zinc-700 transition">
+          <img src="${song.thumb}" class="w-8 h-8 rounded object-cover">
+          <div class="truncate">
+            <p class="text-xs font-bold truncate ${i === currentIndex ? 'text-brand-red' : 'text-white'}">${song.title}</p>
+            <p class="text-[10px] text-brand-text-secondary truncate">${song.artist}</p>
+          </div>
+        </div>
+      `).join('');
+    }
+  </script>
+</body>
+</html>
