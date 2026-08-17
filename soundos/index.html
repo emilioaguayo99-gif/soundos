@@ -26,6 +26,9 @@
       }
     }
   </script>
+  <style>
+    .backdrop-blur-xl { backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+  </style>
 </head>
 <body class="bg-brand-dark text-brand-text-primary font-sans h-screen flex flex-col overflow-hidden select-none">
 
@@ -33,7 +36,6 @@
   <div class="hidden"><div id="youtube-player"></div></div>
 
   <div class="flex flex-1 overflow-hidden relative">
-    
     <!-- BARRA LATERAL (Escritorio) -->
     <aside class="w-64 p-6 bg-black flex-col border-r border-zinc-900 flex-shrink-0 hidden md:flex">
       <div class="flex items-center gap-2 mb-8">
@@ -41,7 +43,7 @@
         <h1 class="text-2xl font-black text-brand-red tracking-tight">SOUND<span class="text-white">OS</span></h1>
       </div>
       <nav class="space-y-4">
-        <a href="#" class="flex items-center gap-4 text-brand-red font-semibold">
+        <a href="#" onclick="location.reload()" class="flex items-center gap-4 text-brand-red font-semibold">
           <i data-lucide="home" class="w-5 h-5"></i> Inicio
         </a>
         <a href="#" onclick="showFavorites()" class="flex items-center gap-4 text-brand-text-secondary hover:text-white transition">
@@ -53,16 +55,12 @@
           <span class="text-xs font-bold text-brand-text-tertiary uppercase">Mis Playlists</span>
           <button onclick="openCreatePlaylistModal()" class="text-brand-red hover:text-red-400"><i data-lucide="plus" class="w-4 h-4"></i></button>
         </div>
-        <div id="sidebar-playlists" class="space-y-2 text-sm text-brand-text-secondary max-h-48 overflow-y-auto">
-          <!-- Playlists dinámicas -->
-        </div>
+        <div id="sidebar-playlists" class="space-y-2 text-sm text-brand-text-secondary max-h-48 overflow-y-auto"></div>
       </div>
     </aside>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="flex-1 p-4 md:p-8 overflow-y-auto pb-44 md:pb-32 w-full">
-      
-      <!-- CABECERA DE BÚSQUEDA -->
       <header class="flex items-center gap-2 md:gap-4 mb-6 sticky top-0 bg-brand-dark/95 backdrop-blur-md z-20 py-2">
         <div class="relative flex-1">
           <i data-lucide="search" class="absolute left-3 md:left-4 top-1/2 -translate-y-1/2 w-4 h-4 md:w-5 md:h-5 text-brand-text-secondary"></i>
@@ -73,35 +71,29 @@
         </button>
       </header>
 
-      <!-- BANNER SPECTRUM -->
       <div class="relative bg-brand-dark-elevated p-5 md:p-8 rounded-2xl mb-6 border border-zinc-900">
         <div class="flex items-center gap-2 mb-2">
           <span class="w-2 h-2 rounded-full bg-brand-red animate-pulse"></span>
           <span id="status-indicator" class="text-[10px] md:text-xs uppercase font-bold text-brand-text-tertiary tracking-wider">En Espera</span>
         </div>
         <h2 class="text-xl md:text-3xl font-extrabold text-white">SoundOS Spectrum</h2>
-        <p class="text-brand-text-secondary text-xs md:text-sm mt-1">Busca, reproduce, guarda tus favoritos y crea playlists personalizadas.</p>
+        <p class="text-brand-text-secondary text-xs md:text-sm mt-1">Toca la carátula inferior para abrir el reproductor a pantalla completa.</p>
       </div>
 
-      <!-- SECCIÓN DE RESULTADOS -->
       <div class="flex flex-col lg:flex-row gap-6">
         <div class="flex-1 space-y-6">
-          <!-- CANCIONES -->
           <div>
             <h3 id="section-title" class="text-xs font-bold text-brand-text-tertiary tracking-wider uppercase mb-3">Top Canciones</h3>
             <div id="top-songs-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <p class="text-xs text-brand-text-tertiary">Escribe en el buscador para ver resultados.</p>
             </div>
           </div>
-
-          <!-- ÁLBUMES -->
           <div>
             <h3 class="text-xs font-bold text-brand-text-tertiary tracking-wider uppercase mb-3">Álbumes y Playlists relacionadas</h3>
             <div id="albums-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3"></div>
           </div>
         </div>
 
-        <!-- PLAYLIST ACTUAL Y COLA -->
         <div class="w-full lg:w-72 space-y-4 flex-shrink-0">
           <h3 class="text-base font-bold">Cola de Reproducción</h3>
           <div id="queue-list" class="space-y-2 max-h-60 lg:max-h-96 overflow-y-auto pr-1">
@@ -112,32 +104,27 @@
     </main>
   </div>
 
-  <!-- NAVEGACIÓN INFERIOR PARA CELULARES -->
+  <!-- NAVEGACIÓN INFERIOR CELULARES -->
   <div class="md:hidden fixed bottom-20 left-0 right-0 bg-zinc-950 border-t border-zinc-900 flex justify-around py-2 z-40 text-[10px] text-brand-text-secondary">
-    <button onclick="location.reload()" class="flex flex-col items-center gap-1 text-brand-red">
-      <i data-lucide="home" class="w-4 h-4"></i> Inicio
-    </button>
-    <button onclick="showFavorites()" class="flex flex-col items-center gap-1">
-      <i data-lucide="heart" class="w-4 h-4"></i> Favoritos
-    </button>
-    <button onclick="openCreatePlaylistModal()" class="flex flex-col items-center gap-1">
-      <i data-lucide="plus-circle" class="w-4 h-4"></i> Crear Playlist
-    </button>
+    <button onclick="location.reload()" class="flex flex-col items-center gap-1 text-brand-red"><i data-lucide="home" class="w-4 h-4"></i> Inicio</button>
+    <button onclick="showFavorites()" class="flex flex-col items-center gap-1"><i data-lucide="heart" class="w-4 h-4"></i> Favoritos</button>
+    <button onclick="openCreatePlaylistModal()" class="flex flex-col items-center gap-1"><i data-lucide="plus-circle" class="w-4 h-4"></i> Crear Playlist</button>
   </div>
 
   <!-- BARRA DE REPRODUCCIÓN INFERIOR -->
   <footer class="fixed bottom-0 left-0 right-0 h-20 md:h-24 bg-zinc-950 px-3 md:px-6 py-2 border-t border-zinc-900 flex flex-col justify-between z-50">
     <div class="flex items-center justify-between gap-2 md:gap-4">
-      <!-- INFO CANCIÓN -->
-      <div class="flex items-center gap-2 md:gap-3 w-1/3 min-w-0">
-        <img id="current-thumb" src="https://via.placeholder.com/40" class="w-9 h-9 md:w-12 md:h-12 rounded object-cover bg-zinc-900 flex-shrink-0">
+      <div class="flex items-center gap-2 md:gap-3 w-1/3 min-w-0 cursor-pointer group" onclick="openFullscreenPlayer()">
+        <div class="relative">
+          <img id="current-thumb" src="https://via.placeholder.com/40" class="w-9 h-9 md:w-12 md:h-12 rounded object-cover bg-zinc-900 flex-shrink-0 group-hover:opacity-80 transition">
+          <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition"><i data-lucide="maximize-2" class="w-4 h-4 text-white"></i></div>
+        </div>
         <div class="truncate">
           <h4 id="current-title" class="text-xs md:text-sm font-bold truncate">Selecciona una pista</h4>
           <p id="current-artist" class="text-[10px] md:text-xs text-brand-text-secondary truncate">SoundOS</p>
         </div>
       </div>
 
-      <!-- CONTROLES PRINCIPALES -->
       <div class="flex flex-col items-center gap-1 w-2/4 max-w-md">
         <div class="flex items-center gap-4 md:gap-6">
           <button id="prev-btn" class="text-brand-text-secondary hover:text-white"><i data-lucide="skip-back" class="w-4 h-4 md:w-5 md:h-5"></i></button>
@@ -146,8 +133,6 @@
           </button>
           <button id="next-btn" class="text-brand-text-secondary hover:text-white"><i data-lucide="skip-forward" class="w-4 h-4 md:w-5 md:h-5"></i></button>
         </div>
-
-        <!-- BARRA TIEMPO -->
         <div class="flex items-center gap-2 w-full text-[10px] md:text-xs text-brand-text-secondary">
           <span id="current-time">0:00</span>
           <input type="range" id="progress-bar" value="0" min="0" max="100" class="flex-1 accent-brand-red h-1 bg-zinc-800 rounded">
@@ -155,7 +140,6 @@
         </div>
       </div>
 
-      <!-- VOLUMEN (Solo escritorio/tablet) -->
       <div class="hidden sm:flex items-center justify-end gap-2 w-1/4 text-xs text-brand-text-secondary">
         <i data-lucide="volume-2" class="w-4 h-4"></i>
         <input type="range" id="volume-bar" value="100" min="0" max="100" class="w-16 md:w-20 accent-brand-red h-1 bg-zinc-800 rounded">
@@ -163,8 +147,39 @@
     </div>
   </footer>
 
+  <!-- REPRODUCTOR PANTALLA COMPLETA (DEEZER STYLE) -->
+  <div id="fullscreen-player" class="fixed inset-0 bg-black/95 z-[200] hidden flex-col justify-between p-6 backdrop-blur-xl transition-all duration-300">
+    <div class="flex items-center justify-between">
+      <button onclick="closeFullscreenPlayer()" class="p-2 text-zinc-400 hover:text-white"><i data-lucide="chevron-down" class="w-8 h-8"></i></button>
+      <span class="text-xs font-bold uppercase text-brand-text-tertiary">Reproduciendo ahora</span>
+      <button onclick="toggleFavCurrent()" class="p-2 text-zinc-400 hover:text-brand-red"><i id="fs-fav-icon" data-lucide="heart" class="w-6 h-6"></i></button>
+    </div>
+
+    <div class="flex flex-col items-center justify-center my-auto w-full max-w-sm mx-auto">
+      <img id="fs-thumb" src="https://via.placeholder.com/300" class="w-64 h-64 md:w-80 md:h-80 rounded-2xl shadow-2xl object-cover mb-8 border border-zinc-800">
+      <h3 id="fs-title" class="text-lg md:text-xl font-black text-center truncate w-full mb-1">Título</h3>
+      <p id="fs-artist" class="text-sm text-brand-text-secondary text-center truncate w-full mb-6">Artista</p>
+
+      <div class="w-full space-y-2 mb-6">
+        <input type="range" id="fs-progress-bar" value="0" min="0" max="100" class="w-full accent-brand-red h-1.5 bg-zinc-800 rounded">
+        <div class="flex justify-between text-xs text-brand-text-tertiary">
+          <span id="fs-current-time">0:00</span>
+          <span id="fs-total-duration">0:00</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-8">
+        <button id="fs-prev-btn" class="text-white hover:text-brand-red transition"><i data-lucide="skip-back" class="w-8 h-8"></i></button>
+        <button id="fs-play-btn" class="w-16 h-16 rounded-full bg-brand-red text-white flex items-center justify-center hover:scale-105 active:scale-95 transition">
+          <i id="fs-play-icon" data-lucide="play" class="w-8 h-8 fill-white"></i>
+        </button>
+        <button id="fs-next-btn" class="text-white hover:text-brand-red transition"><i data-lucide="skip-forward" class="w-8 h-8"></i></button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL CREAR PLAYLIST -->
-  <div id="playlist-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[100] p-4">
+  <div id="playlist-modal" class="fixed inset-0 bg-black/80 hidden items-center justify-center z-[250] p-4">
     <div class="bg-brand-dark-elevated p-6 rounded-2xl border border-zinc-800 w-full max-w-sm">
       <h3 class="text-lg font-bold mb-4">Nueva Playlist</h3>
       <input type="text" id="playlist-name-input" placeholder="Nombre de la playlist..." class="w-full p-2.5 bg-brand-dark-input rounded-lg border border-zinc-800 outline-none text-sm mb-4">
@@ -198,17 +213,81 @@
     }
 
     function onPlayerStateChange(e) {
-      const playIcon = document.getElementById('play-icon');
       if (e.data == YT.PlayerState.PLAYING) {
         isPlaying = true;
-        playIcon.setAttribute('data-lucide', 'pause');
+        updatePlayIcons(true);
         startProgressLoop();
       } else {
         isPlaying = false;
-        playIcon.setAttribute('data-lucide', 'play');
+        updatePlayIcons(false);
         stopProgressLoop();
       }
+
+      // CORRELATIVIDAD AUTOMÁTICA AL FINALIZAR
+      if (e.data == YT.PlayerState.ENDED) {
+        handleNextSong();
+      }
+    }
+
+    function updatePlayIcons(playing) {
+      const icon = playing ? 'pause' : 'play';
+      document.getElementById('play-icon').setAttribute('data-lucide', icon);
+      document.getElementById('fs-play-icon').setAttribute('data-lucide', icon);
       lucide.createIcons();
+    }
+
+    // SIGUIENTE CANCIÓN CORRELATIVA AUTOMÁTICA
+    async function handleNextSong() {
+      if (currentIndex < queue.length - 1) {
+        currentIndex++;
+        loadTrack(queue[currentIndex]);
+        updateQueueUI();
+      } else if (queue[currentIndex]) {
+        // Cargar similares del mismo artista o tema
+        const currentArtist = queue[currentIndex].artist;
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=5&q=${encodeURIComponent(currentArtist + ' similar songs')}&type=video&videoCategoryId=10&key=${YOUTUBE_API_KEY}`);
+        const data = await res.json();
+        
+        if (data.items && data.items.length) {
+          const nextSongs = data.items.map(item => ({
+            id: item.id.videoId,
+            title: item.snippet.title.replace(/'/g, ""),
+            artist: item.snippet.channelTitle.replace(/'/g, ""),
+            thumb: item.snippet.thumbnails.high.url
+          }));
+          queue.push(...nextSongs);
+          currentIndex++;
+          loadTrack(queue[currentIndex]);
+          updateQueueUI();
+        }
+      }
+    }
+
+    // PANTALLA COMPLETA ESTILO DEEZER
+    function openFullscreenPlayer() {
+      if (!queue.length) return;
+      document.getElementById('fullscreen-player').classList.remove('hidden');
+      document.getElementById('fullscreen-player').classList.add('flex');
+    }
+
+    function closeFullscreenPlayer() {
+      document.getElementById('fullscreen-player').classList.add('hidden');
+      document.getElementById('fullscreen-player').classList.remove('flex');
+    }
+
+    function toggleFavCurrent() {
+      if (!queue[currentIndex]) return;
+      const track = queue[currentIndex];
+      toggleFavorite(track.id, track.title, track.artist, track.thumb);
+      updateFsFavIcon();
+    }
+
+    function updateFsFavIcon() {
+      if (!queue[currentIndex]) return;
+      const isFav = favorites.some(f => f.id === queue[currentIndex].id);
+      const icon = document.getElementById('fs-fav-icon');
+      if (isFav) icon.classList.add('fill-brand-red', 'text-brand-red');
+      else icon.classList.remove('fill-brand-red', 'text-brand-red');
     }
 
     // BÚSQUEDA Y RENDERIZADO
@@ -254,9 +333,6 @@
               <button onclick="playDirectly('${song.id}', '${song.title}', '${song.artist}', '${song.thumb}')" class="bg-brand-red text-white text-[10px] font-bold p-1.5 rounded-full">
                 <i data-lucide="play" class="w-3 h-3 fill-white"></i>
               </button>
-              <button onclick="addToPlaylistPrompt('${song.id}', '${song.title}', '${song.artist}', '${song.thumb}')" class="p-1.5 text-zinc-500 hover:text-white">
-                <i data-lucide="plus" class="w-4 h-4"></i>
-              </button>
             </div>
           </div>
         `;
@@ -277,13 +353,12 @@
       `).join('');
     }
 
-    // FAVORITOS
+    // FAVORITOS Y PLAYLISTS
     function toggleFavorite(id, title, artist, thumb) {
       const index = favorites.findIndex(f => f.id === id);
       if (index >= 0) favorites.splice(index, 1);
       else favorites.push({ id, title, artist, thumb });
       localStorage.setItem('soundos_favs', JSON.stringify(favorites));
-      searchYouTube(document.getElementById('search-input').value.trim() || 'top music');
     }
 
     function showFavorites() {
@@ -291,7 +366,6 @@
       renderSongs(favorites);
     }
 
-    // PLAYLISTS PERSONALIZADAS
     function openCreatePlaylistModal() {
       document.getElementById('playlist-modal').classList.remove('hidden');
       document.getElementById('playlist-modal').classList.add('flex');
@@ -322,23 +396,12 @@
       `).join('');
     }
 
-    function addToPlaylistPrompt(id, title, artist, thumb) {
-      const names = Object.keys(customPlaylists);
-      if (!names.length) return alert("Crea primero una playlist desde la barra lateral.");
-      const selected = prompt(`Elige playlist:\n${names.join('\n')}`);
-      if (selected && customPlaylists[selected]) {
-        customPlaylists[selected].push({ id, title, artist, thumb });
-        localStorage.setItem('soundos_playlists', JSON.stringify(customPlaylists));
-        renderSidebarPlaylists();
-      }
-    }
-
     function showPlaylist(name) {
       document.getElementById('section-title').textContent = `Playlist: ${name}`;
       renderSongs(customPlaylists[name] || []);
     }
 
-    // CONTROLES GENERALES
+    // REPRODUCCIÓN
     function playDirectly(id, title, artist, thumb) {
       queue.unshift({ id, title, artist, thumb });
       currentIndex = 0;
@@ -349,9 +412,15 @@
     function loadTrack(track) {
       if (!player || !track) return;
       player.loadVideoById(track.id);
+      
       document.getElementById('current-title').textContent = track.title;
       document.getElementById('current-artist').textContent = track.artist;
       document.getElementById('current-thumb').src = track.thumb;
+
+      document.getElementById('fs-title').textContent = track.title;
+      document.getElementById('fs-artist').textContent = track.artist;
+      document.getElementById('fs-thumb').src = track.thumb;
+      updateFsFavIcon();
     }
 
     function startProgressLoop() {
@@ -359,9 +428,18 @@
       progressTimer = setInterval(() => {
         if (player && player.getCurrentTime) {
           const c = player.getCurrentTime() || 0, t = player.getDuration() || 0;
-          document.getElementById('current-time').textContent = formatTime(c);
-          document.getElementById('total-duration').textContent = formatTime(t);
-          if (t > 0) document.getElementById('progress-bar').value = (c / t) * 100;
+          const timeStr = formatTime(c), durationStr = formatTime(t);
+
+          document.getElementById('current-time').textContent = timeStr;
+          document.getElementById('total-duration').textContent = durationStr;
+          document.getElementById('fs-current-time').textContent = timeStr;
+          document.getElementById('fs-total-duration').textContent = durationStr;
+
+          if (t > 0) {
+            const val = (c / t) * 100;
+            document.getElementById('progress-bar').value = val;
+            document.getElementById('fs-progress-bar').value = val;
+          }
         }
       }, 1000);
     }
@@ -369,13 +447,22 @@
     function stopProgressLoop() { if (progressTimer) clearInterval(progressTimer); }
     function formatTime(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
 
-    document.getElementById('progress-bar').oninput = (e) => {
-      if (player && player.getDuration) player.seekTo((e.target.value / 100) * player.getDuration(), true);
-    };
-    document.getElementById('volume-bar').oninput = (e) => { if (player && player.setVolume) player.setVolume(e.target.value); };
-    document.getElementById('play-btn').onclick = () => { if (queue.length) isPlaying ? player.pauseVideo() : player.playVideo(); };
+    // BINDINGS CONTROLES
+    const syncSeek = (e) => { if (player && player.getDuration) player.seekTo((e.target.value / 100) * player.getDuration(), true); };
+    document.getElementById('progress-bar').oninput = syncSeek;
+    document.getElementById('fs-progress-bar').oninput = syncSeek;
+
+    const togglePlay = () => { if (queue.length) isPlaying ? player.pauseVideo() : player.playVideo(); };
+    document.getElementById('play-btn').onclick = togglePlay;
+    document.getElementById('fs-play-btn').onclick = togglePlay;
+
     document.getElementById('prev-btn').onclick = () => { if (currentIndex > 0) { currentIndex--; loadTrack(queue[currentIndex]); updateQueueUI(); } };
-    document.getElementById('next-btn').onclick = () => { if (currentIndex < queue.length - 1) { currentIndex++; loadTrack(queue[currentIndex]); updateQueueUI(); } };
+    document.getElementById('fs-prev-btn').onclick = () => document.getElementById('prev-btn').click();
+
+    document.getElementById('next-btn').onclick = handleNextSong;
+    document.getElementById('fs-next-btn').onclick = handleNextSong;
+
+    document.getElementById('volume-bar').oninput = (e) => { if (player && player.setVolume) player.setVolume(e.target.value); };
     document.getElementById('search-btn').onclick = () => searchYouTube(document.getElementById('search-input').value.trim());
     document.getElementById('search-input').onkeypress = (e) => { if (e.key === 'Enter') document.getElementById('search-btn').click(); };
 
