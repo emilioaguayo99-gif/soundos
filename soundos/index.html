@@ -2,7 +2,7 @@
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Spotify Web Player</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
@@ -17,8 +17,7 @@
               base: '#000000',
               elevated: '#181818',
               highlight: '#282828',
-              press: '#000000',
-              accent: '#E50914', // Color definido personalizado
+              green: '#1DB954',
               text: '#FFFFFF',
               subtext: '#B3B3B3'
             }
@@ -28,100 +27,136 @@
     }
   </script>
   <style>
-    .custom-scroll::-webkit-scrollbar { width: 8px; }
-    .custom-scroll::-webkit-scrollbar-thumb { background: #333; rounded: 4px; }
-    .custom-scroll::-webkit-scrollbar-thumb:hover { background: #555; }
-    .backdrop-blur-xl { backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+    .custom-scroll::-webkit-scrollbar { width: 6px; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    /* Ajuste de pantalla completa móvil sin márgenes */
+    body, html { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
   </style>
 </head>
-<body class="bg-spotify-base text-spotify-text font-sans h-screen flex flex-col overflow-hidden select-none">
+<body class="text-spotify-text font-sans h-full w-full flex flex-col select-none antialiased">
 
-  <!-- REPRODUCTOR OCULTO -->
+  <!-- REPRODUCTORES DE AUDIO -->
   <div id="youtube-player" class="hidden"></div>
-  <audio id="mobile-audio-keeper" loop class="hidden" src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA="></audio>
+  <audio id="mobile-audio" class="hidden" preload="auto" playsinline></audio>
 
-  <!-- CONTENEDOR PRINCIPAL (ESCRITORIO / MÓVIL) -->
-  <div class="flex-1 flex overflow-hidden p-0 md:p-2 md:gap-2">
+  <!-- CONTENEDOR PRINCIPAL -->
+  <div class="flex-1 flex overflow-hidden w-full h-full md:p-2 md:gap-2">
 
-    <!-- BARRA LATERAL (SOLO ESCRITORIO) -->
+    <!-- DESKTOP SIDEBAR -->
     <aside class="hidden md:flex flex-col w-64 bg-spotify-black rounded-xl p-3 gap-2 flex-shrink-0">
       <div class="bg-spotify-elevated rounded-lg p-4 space-y-4">
-        <button onclick="switchTab('home')" class="flex items-center gap-4 text-spotify-text hover:text-white font-bold text-sm w-full">
+        <button onclick="switchTab('home')" class="flex items-center gap-4 text-white font-bold text-sm w-full">
           <i data-lucide="home" class="w-6 h-6"></i> Inicio
         </button>
         <button onclick="switchTab('search')" class="flex items-center gap-4 text-spotify-subtext hover:text-white font-bold text-sm w-full">
           <i data-lucide="search" class="w-6 h-6"></i> Buscar
         </button>
       </div>
-
       <div class="bg-spotify-elevated rounded-lg p-4 flex-1 flex flex-col overflow-hidden">
         <div class="flex items-center justify-between text-spotify-subtext mb-4">
           <button onclick="switchTab('playlists')" class="flex items-center gap-2 hover:text-white font-bold text-sm">
             <i data-lucide="library" class="w-6 h-6"></i> Tu biblioteca
           </button>
-          <button onclick="openCreatePlaylistModal()" class="hover:text-white p-1">
-            <i data-lucide="plus" class="w-5 h-5"></i>
-          </button>
         </div>
-        <div id="desktop-library-list" class="flex-1 overflow-y-auto space-y-2 custom-scroll">
-          <!-- Playlists cargadas -->
-        </div>
+        <div id="desktop-library-list" class="flex-1 overflow-y-auto space-y-2 custom-scroll"></div>
       </div>
     </aside>
 
-    <!-- ÁREA DE CONTENIDO PRINCIPAL -->
-    <main class="flex-1 bg-spotify-black md:rounded-xl flex flex-col overflow-hidden relative">
+    <!-- ÁREA DE CONTENIDO (MÓVIL Y DESKTOP) -->
+    <main class="flex-1 bg-spotify-black md:rounded-xl flex flex-col overflow-hidden relative w-full h-full">
       
-      <!-- HEADER FLOTANTE (ESCRITORIO) -->
+      <!-- DESKTOP HEADER -->
       <header class="hidden md:flex items-center justify-between p-4 bg-spotify-black/80 backdrop-blur-md sticky top-0 z-20">
         <div class="flex gap-2">
           <button class="w-8 h-8 rounded-full bg-black/70 flex items-center justify-center text-spotify-subtext"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
           <button class="w-8 h-8 rounded-full bg-black/70 flex items-center justify-center text-spotify-subtext"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
         </div>
         <div id="desktop-search-bar" class="hidden flex-1 max-w-md mx-4">
-          <div class="relative">
-            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-spotify-subtext"></i>
-            <input type="text" id="desktop-search-input" placeholder="¿Qué quieres escuchar?" class="w-full pl-10 pr-4 py-2 bg-spotify-highlight text-sm rounded-full outline-none text-white focus:ring-2 focus:ring-white">
-          </div>
+          <input type="text" id="desktop-search-input" placeholder="¿Qué quieres escuchar?" class="w-full pl-10 pr-4 py-2 bg-spotify-highlight text-sm rounded-full outline-none text-white">
         </div>
       </header>
 
       <!-- VISTAS -->
-      <div class="flex-1 overflow-y-auto p-4 md:p-6 space-y-6 custom-scroll pb-32 md:pb-6">
+      <div class="flex-1 overflow-y-auto custom-scroll w-full pb-36 md:pb-6">
         
-        <!-- VISTA: INICIO (PLAYLISTS ESTILO SPOTIFY) -->
-        <section id="view-home" class="tab-content space-y-6">
-          <h2 class="text-2xl font-black tracking-tight">Buenas noches</h2>
-          <div id="home-playlists-grid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            <!-- Playlists de Inicio -->
+        <!-- VISTA: INICIO (ESTILO SPOTIFY NATIVO) -->
+        <section id="view-home" class="tab-content p-4 space-y-6">
+          <!-- Header Móvil con Avatar y Filtros -->
+          <div class="flex items-center gap-3 pt-2">
+            <div class="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-bold text-xs">U</div>
+            <div class="flex gap-2 overflow-x-auto no-scrollbar">
+              <span class="px-3 py-1 bg-spotify-green text-black text-xs font-bold rounded-full">Todo</span>
+              <span class="px-3 py-1 bg-spotify-highlight text-white text-xs font-semibold rounded-full">Música</span>
+              <span class="px-3 py-1 bg-spotify-highlight text-white text-xs font-semibold rounded-full">Podcasts</span>
+            </div>
+          </div>
+
+          <!-- Grid de acceso rápido 2 columnas -->
+          <div id="home-playlists-grid" class="grid grid-cols-2 gap-2">
+            <!-- Cargado dinámicamente -->
+          </div>
+
+          <!-- Sección Volver a Escuchar -->
+          <div class="space-y-3 pt-2">
+            <h2 class="text-xl font-bold tracking-tight">Volver a escuchar</h2>
+            <div id="recent-horizontal-list" class="flex gap-4 overflow-x-auto no-scrollbar">
+              <!-- Cargado dinámicamente -->
+            </div>
           </div>
         </section>
 
-        <!-- VISTA: BUSCAR -->
-        <section id="view-search" class="tab-content space-y-4 hidden">
-          <div class="md:hidden sticky top-0 bg-spotify-black pt-2 pb-4 z-10">
-            <div class="relative">
-              <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-spotify-subtext"></i>
-              <input type="text" id="mobile-search-input" placeholder="Canciones, artistas..." class="w-full pl-10 pr-4 py-3 bg-spotify-highlight text-sm rounded-lg outline-none text-white">
-            </div>
+        <!-- VISTA: BUSCAR (CON CATEGORÍAS NATIVAS) -->
+        <section id="view-search" class="tab-content p-4 space-y-5 hidden">
+          <div class="flex items-center justify-between pt-2">
+            <h1 class="text-2xl font-bold">Buscar</h1>
+            <i data-lucide="camera" class="w-6 h-6"></i>
           </div>
-          <h3 class="text-lg font-bold">Resultados principales</h3>
-          <div id="search-results-list" class="space-y-2">
-            <p class="text-sm text-spotify-subtext">Busca tus temas favoritos.</p>
+
+          <!-- Input de búsqueda instantánea -->
+          <div class="relative">
+            <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-black"></i>
+            <input type="text" id="mobile-search-input" placeholder="¿Qué quieres escuchar?" class="w-full pl-10 pr-4 py-3 bg-white text-black font-semibold text-sm rounded-md outline-none">
+          </div>
+
+          <!-- Resultados Rápidos -->
+          <div id="search-results-container" class="hidden space-y-2">
+            <h3 class="text-sm font-bold text-spotify-subtext uppercase">Canciones</h3>
+            <div id="search-results-list" class="space-y-1"></div>
+          </div>
+
+          <!-- Explorar Todo (Categorías) -->
+          <div id="search-categories" class="space-y-4">
+            <h2 class="text-sm font-bold">Empieza a explorar</h2>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="bg-purple-600 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Música</div>
+              <div class="bg-red-700 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Podcasts</div>
+              <div class="bg-blue-600 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Rankings</div>
+              <div class="bg-purple-800 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Eventos en vivo</div>
+            </div>
           </div>
         </section>
 
         <!-- VISTA: DETALLE DE PLAYLIST -->
-        <section id="view-playlist-detail" class="tab-content space-y-6 hidden">
-          <div class="flex flex-col md:flex-row items-center md:items-end gap-6 bg-gradient-to-b from-spotify-accent/30 to-transparent p-4 rounded-xl">
-            <img id="detail-cover" src="https://via.placeholder.com/200" class="w-48 h-48 shadow-2xl rounded-md object-cover">
-            <div class="space-y-2 text-center md:text-left">
-              <span class="text-xs font-bold uppercase text-spotify-text">Playlist</span>
-              <h1 id="detail-title" class="text-3xl md:text-6xl font-black">Nombre Playlist</h1>
-              <p id="detail-count" class="text-sm text-spotify-subtext">0 canciones</p>
+        <section id="view-playlist-detail" class="tab-content space-y-4 hidden p-4">
+          <button onclick="switchTab('home')" class="text-white"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+          <div class="flex flex-col items-center text-center space-y-3">
+            <img id="detail-cover" src="https://via.placeholder.com/300" class="w-52 h-52 shadow-2xl rounded-md object-cover">
+            <h1 id="detail-title" class="text-2xl font-bold"></h1>
+            <p id="detail-count" class="text-xs text-spotify-subtext"></p>
+            <div class="flex items-center justify-between w-full px-2 pt-2">
+              <div class="flex gap-4 text-spotify-subtext">
+                <i data-lucide="plus-circle" class="w-6 h-6"></i>
+                <i data-lucide="arrow-down-circle" class="w-6 h-6"></i>
+                <i data-lucide="more-horizontal" class="w-6 h-6"></i>
+              </div>
+              <button onclick="playIndex(0)" class="w-12 h-12 rounded-full bg-spotify-green flex items-center justify-center shadow-lg">
+                <i data-lucide="play" class="w-6 h-6 text-black fill-black ml-0.5"></i>
+              </button>
             </div>
           </div>
-          <div id="detail-songs-list" class="space-y-1"></div>
+          <div id="detail-songs-list" class="space-y-2 pt-4"></div>
         </section>
 
       </div>
@@ -129,57 +164,53 @@
 
   </div>
 
-  <!-- REPRODUCTOR INFERIOR (ESCRITORIO Y BARRA MÓVIL) -->
-  <footer class="h-20 md:h-24 bg-black border-t border-spotify-highlight/30 px-4 flex items-center justify-between z-50">
-    
-    <!-- TRACK INFO -->
-    <div class="flex items-center gap-3 w-1/3 min-w-0" onclick="openFullscreenPlayer()">
+  <!-- REPRODUCTOR FLOTANTE (MÓVIL / ESTILO NATIVO) -->
+  <div id="mini-player" class="fixed bottom-16 left-2 right-2 bg-[#282828] rounded-md p-2 flex items-center justify-between z-40 md:hidden shadow-2xl border border-white/5" onclick="openFullscreenPlayer()">
+    <div class="flex items-center gap-3 min-w-0 flex-1">
+      <img id="mini-thumb" src="https://via.placeholder.com/48" class="w-10 h-10 rounded object-cover flex-shrink-0 bg-spotify-black">
+      <div class="truncate">
+        <h4 id="mini-title" class="text-xs font-bold truncate text-white">Selecciona música</h4>
+        <p id="mini-artist" class="text-[11px] text-spotify-subtext truncate">Spotify</p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3 pr-2" onclick="event.stopPropagation()">
+      <i data-lucide="monitor" class="w-5 h-5 text-spotify-subtext"></i>
+      <button onclick="togglePlay()"><i id="mini-play-icon" data-lucide="play" class="w-6 h-6 text-white fill-white"></i></button>
+    </div>
+  </div>
+
+  <!-- REPRODUCTOR DESKTOP INFERIOR -->
+  <footer class="hidden md:flex h-24 bg-black border-t border-spotify-highlight/30 px-4 items-center justify-between z-50">
+    <div class="flex items-center gap-3 w-1/3 min-w-0">
       <img id="player-thumb" src="https://via.placeholder.com/56" class="w-12 h-12 rounded object-cover flex-shrink-0 bg-spotify-highlight">
       <div class="truncate">
         <h4 id="player-title" class="text-sm font-semibold truncate text-white">Selecciona una canción</h4>
-        <p id="player-artist" class="text-xs text-spotify-subtext truncate">SoundOS</p>
+        <p id="player-artist" class="text-xs text-spotify-subtext truncate">Spotify</p>
       </div>
     </div>
-
-    <!-- CONTROLES CENTRALES -->
-    <div class="flex flex-col items-center gap-1 w-full md:w-1/3 max-w-md">
+    <div class="flex flex-col items-center gap-1 w-1/3 max-w-md">
       <div class="flex items-center gap-4">
-        <button onclick="toggleShuffle()" id="shuffle-btn" class="hidden md:block text-spotify-subtext hover:text-white"><i data-lucide="shuffle" class="w-4 h-4"></i></button>
-        <button onclick="playPrevTrack()" class="text-spotify-subtext hover:text-white"><i data-lucide="skip-back" class="w-5 h-5 fill-current"></i></button>
-        <button id="main-play-btn" onclick="togglePlay()" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 transition">
+        <button onclick="togglePlay()" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center">
           <i id="main-play-icon" data-lucide="play" class="w-4 h-4 fill-black"></i>
         </button>
-        <button onclick="handleNextSong()" class="text-spotify-subtext hover:text-white"><i data-lucide="skip-forward" class="w-5 h-5 fill-current"></i></button>
-        <button onclick="toggleRepeat()" id="repeat-btn" class="hidden md:block text-spotify-subtext hover:text-white"><i data-lucide="repeat" class="w-4 h-4"></i></button>
-      </div>
-      <div class="hidden md:flex items-center gap-2 w-full text-xs text-spotify-subtext">
-        <span id="current-time">0:00</span>
-        <input type="range" id="progress-bar" value="0" min="0" max="100" class="w-full accent-white h-1 bg-spotify-highlight rounded cursor-pointer">
-        <span id="total-duration">0:00</span>
       </div>
     </div>
-
-    <!-- OPCIONES ADICIONALES (SOLO ESCRITORIO) -->
-    <div class="hidden md:flex items-center justify-end gap-3 w-1/3">
-      <i data-lucide="volume-2" class="w-5 h-5 text-spotify-subtext"></i>
-      <input type="range" id="volume-bar" value="100" min="0" max="100" class="w-20 accent-white h-1 bg-spotify-highlight rounded">
-    </div>
-
+    <div class="w-1/3"></div>
   </footer>
 
-  <!-- BARRA DE NAVEGACIÓN MÓVIL -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black/95 border-t border-spotify-highlight/40 flex justify-around items-center z-40 backdrop-blur-lg">
-    <button onclick="switchTab('home')" id="mob-nav-home" class="flex flex-col items-center text-spotify-accent">
-      <i data-lucide="home" class="w-5 h-5"></i>
+  <!-- BARRA DE NAVEGACIÓN MÓVIL (NATIVA) -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black border-t border-white/10 flex justify-around items-center z-50 px-6">
+    <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-white">
+      <i data-lucide="home" class="w-6 h-6"></i>
       <span class="text-[10px] mt-1 font-medium">Inicio</span>
     </button>
-    <button onclick="switchTab('search')" id="mob-nav-search" class="flex flex-col items-center text-spotify-subtext">
-      <i data-lucide="search" class="w-5 h-5"></i>
+    <button onclick="switchTab('search')" id="nav-search" class="flex flex-col items-center text-spotify-subtext">
+      <i data-lucide="search" class="w-6 h-6"></i>
       <span class="text-[10px] mt-1 font-medium">Buscar</span>
     </button>
-    <button onclick="switchTab('playlists')" id="mob-nav-library" class="flex flex-col items-center text-spotify-subtext">
-      <i data-lucide="library" class="w-5 h-5"></i>
-      <span class="text-[10px] mt-1 font-medium">Biblioteca</span>
+    <button onclick="switchTab('playlists')" id="nav-library" class="flex flex-col items-center text-spotify-subtext">
+      <i data-lucide="library" class="w-6 h-6"></i>
+      <span class="text-[10px] mt-1 font-medium">Tu biblioteca</span>
     </button>
   </nav>
 
@@ -187,8 +218,8 @@
     lucide.createIcons();
 
     const YOUTUBE_API_KEY = "AIzaSyDmdwQXMXx3yi8h48KYOgLiY1l86Qm5Ick";
-    let player, queue = [], currentIndex = 0, isPlaying = false, timer = null;
-    let isShuffle = false, isRepeat = false;
+    let player, queue = [], currentIndex = 0, isPlaying = false;
+    const cache = new Map(); // Caché rápida para búsquedas
 
     // CARGA DE YOUTUBE IFRAME
     const tag = document.createElement('script');
@@ -200,78 +231,71 @@
         height: '0', width: '0',
         playerVars: { 'autoplay': 1, 'controls': 0, 'playsinline': 1 },
         events: {
-          'onReady': () => loadHomePlaylists(),
-          'onStateChange': onPlayerStateChange,
-          'onError': (e) => console.log('Error reproductor YT:', e)
+          'onReady': () => loadHomeData(),
+          'onStateChange': onPlayerStateChange
         }
       });
     }
 
-    async function loadHomePlaylists() {
-      try {
-        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&q=spotify+top+hits+playlist&type=playlist&key=${YOUTUBE_API_KEY}`);
-        const data = await res.json();
+    // CARGA RÁPIDA DE INICIO
+    async function loadHomeData() {
+      const query = "spotify top hits";
+      const data = await fetchYouTube(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&q=${encodeURIComponent(query)}&type=playlist&key=${YOUTUBE_API_KEY}`);
+      
+      if (data && data.items) {
         const grid = document.getElementById('home-playlists-grid');
+        grid.innerHTML = data.items.map(item => `
+          <div onclick="loadPlaylist('${item.id.playlistId}', '${item.snippet.title.replace(/'/g, "")}', '${item.snippet.thumbnails.high.url}')" class="bg-spotify-highlight/60 flex items-center gap-3 rounded-md overflow-hidden cursor-pointer active:scale-95 transition">
+            <img src="${item.snippet.thumbnails.high.url}" class="w-14 h-14 object-cover flex-shrink-0">
+            <span class="font-bold text-xs line-clamp-2 pr-2 leading-tight">${item.snippet.title}</span>
+          </div>
+        `).join('');
 
-        if (data.items) {
-          grid.innerHTML = data.items.map(item => `
-            <div onclick="loadYouTubePlaylist('${item.id.playlistId}', '${item.snippet.title.replace(/'/g, "")}', '${item.snippet.thumbnails.high.url}')" class="bg-spotify-elevated hover:bg-spotify-highlight p-4 rounded-md cursor-pointer transition group">
-              <div class="relative mb-4">
-                <img src="${item.snippet.thumbnails.high.url}" class="w-full aspect-square object-cover rounded-md shadow-lg">
-                <button class="absolute bottom-2 right-2 w-10 h-10 bg-spotify-accent rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 shadow-xl transition transform translate-y-2 group-hover:translate-y-0">
-                  <i data-lucide="play" class="w-5 h-5 text-white fill-white ml-0.5"></i>
-                </button>
-              </div>
-              <p class="font-bold text-sm truncate text-white">${item.snippet.title}</p>
-              <p class="text-xs text-spotify-subtext mt-1 truncate">${item.snippet.channelTitle}</p>
-            </div>
-          `).join('');
-          lucide.createIcons();
-        }
-      } catch (e) { console.error(e); }
+        const horizontal = document.getElementById('recent-horizontal-list');
+        horizontal.innerHTML = data.items.map(item => `
+          <div onclick="loadPlaylist('${item.id.playlistId}', '${item.snippet.title.replace(/'/g, "")}', '${item.snippet.thumbnails.high.url}')" class="flex-shrink-0 w-36 space-y-2 cursor-pointer">
+            <img src="${item.snippet.thumbnails.high.url}" class="w-36 h-36 rounded-md object-cover">
+            <p class="font-bold text-xs truncate">${item.snippet.title}</p>
+            <p class="text-[10px] text-spotify-subtext truncate">${item.snippet.channelTitle}</p>
+          </div>
+        `).join('');
+      }
     }
 
-    async function loadYouTubePlaylist(playlistId, title, coverUrl) {
-      const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${playlistId}&key=${YOUTUBE_API_KEY}`);
-      const data = await res.json();
-
-      if (data.items) {
+    async function loadPlaylist(id, title, cover) {
+      const data = await fetchYouTube(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${id}&key=${YOUTUBE_API_KEY}`);
+      if (data && data.items) {
         queue = data.items
           .filter(item => item.snippet.title !== "Private video")
           .map(item => ({
             id: item.snippet.resourceId.videoId,
             title: item.snippet.title,
             artist: item.snippet.channelTitle,
-            thumb: item.snippet.thumbnails?.high?.url || coverUrl
+            thumb: item.snippet.thumbnails?.high?.url || cover
           }));
 
         if (queue.length) {
-          currentIndex = 0;
           document.getElementById('detail-title').textContent = title;
           document.getElementById('detail-count').textContent = `${queue.length} canciones`;
-          document.getElementById('detail-cover').src = coverUrl;
-          renderPlaylistSongs(queue);
+          document.getElementById('detail-cover').src = cover;
+          renderSongs(queue);
           switchTab('playlist-detail');
-          loadTrack(queue[0]);
         }
       }
     }
 
-    function renderPlaylistSongs(songs) {
+    function renderSongs(songs) {
       const list = document.getElementById('detail-songs-list');
       list.innerHTML = songs.map((song, i) => `
-        <div onclick="playIndex(${i})" class="flex items-center justify-between p-2 rounded-md hover:bg-spotify-highlight/50 cursor-pointer group">
+        <div onclick="playIndex(${i})" class="flex items-center justify-between py-2 cursor-pointer active:bg-spotify-highlight/40 rounded px-1">
           <div class="flex items-center gap-3 truncate">
-            <span class="w-5 text-right text-xs text-spotify-subtext font-bold">${i + 1}</span>
-            <img src="${song.thumb}" class="w-10 h-10 rounded object-cover flex-shrink-0">
+            <img src="${song.thumb}" class="w-11 h-11 rounded object-cover flex-shrink-0">
             <div class="truncate">
-              <p class="font-semibold text-sm truncate text-white">${song.title}</p>
-              <p class="text-xs text-spotify-subtext truncate">${song.artist}</p>
+              <p class="font-semibold text-sm truncate text-white leading-tight">${song.title}</p>
+              <p class="text-xs text-spotify-subtext truncate mt-0.5">${song.artist}</p>
             </div>
           </div>
-          <button class="text-spotify-subtext hover:text-white p-2">
-            <i data-lucide="play" class="w-4 h-4 fill-current"></i>
-          </button>
+          <i data-lucide="more-vertical" class="w-5 h-5 text-spotify-subtext flex-shrink-0"></i>
         </div>
       `).join('');
       lucide.createIcons();
@@ -283,44 +307,33 @@
     }
 
     function loadTrack(track) {
-      if (!player || !track) return;
+      if (!track) return;
       
-      // Activa audio keeper para móviles
-      const audioKeeper = document.getElementById('mobile-audio-keeper');
-      audioKeeper.play().catch(() => {});
-
+      // Reproducción instantánea
       player.loadVideoById(track.id);
+
+      // Actualización rápida de UI
+      document.getElementById('mini-title').textContent = track.title;
+      document.getElementById('mini-artist').textContent = track.artist;
+      document.getElementById('mini-thumb').src = track.thumb;
 
       document.getElementById('player-title').textContent = track.title;
       document.getElementById('player-artist').textContent = track.artist;
       document.getElementById('player-thumb').src = track.thumb;
-
-      if ('mediaSession' in navigator) {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: track.title, artist: track.artist,
-          artwork: [{ src: track.thumb, sizes: '512x512', type: 'image/jpeg' }]
-        });
-      }
     }
 
     function onPlayerStateChange(e) {
-      if (e.data == YT.PlayerState.PLAYING) {
-        isPlaying = true;
-        updatePlayIcons(true);
-        startTimer();
-      } else {
-        isPlaying = false;
-        updatePlayIcons(false);
-        stopTimer();
-      }
+      isPlaying = (e.data == YT.PlayerState.PLAYING);
+      const icon = isPlaying ? 'pause' : 'play';
+      
+      const mIcon = document.getElementById('mini-play-icon');
+      if (mIcon) mIcon.setAttribute('data-lucide', icon);
+      
+      const dIcon = document.getElementById('main-play-icon');
+      if (dIcon) dIcon.setAttribute('data-lucide', icon);
 
-      if (e.data == YT.PlayerState.ENDED) handleNextSong();
-    }
-
-    function updatePlayIcons(playing) {
-      const icon = playing ? 'pause' : 'play';
-      document.getElementById('main-play-icon').setAttribute('data-lucide', icon);
       lucide.createIcons();
+      if (e.data == YT.PlayerState.ENDED && currentIndex < queue.length - 1) playIndex(currentIndex + 1);
     }
 
     function togglePlay() {
@@ -328,69 +341,69 @@
       isPlaying ? player.pauseVideo() : player.playVideo();
     }
 
-    function handleNextSong() {
-      if (currentIndex < queue.length - 1) {
-        currentIndex++;
-        loadTrack(queue[currentIndex]);
+    // BÚSQUEDA OPTIMIZADA CON DEBOUNCE Y CACHÉ
+    let searchDebounce;
+    document.getElementById('mobile-search-input').oninput = (e) => {
+      clearTimeout(searchDebounce);
+      const val = e.target.value.trim();
+      
+      if (!val) {
+        document.getElementById('search-results-container').classList.add('hidden');
+        document.getElementById('search-categories').classList.remove('hidden');
+        return;
       }
-    }
 
-    function playPrevTrack() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        loadTrack(queue[currentIndex]);
-      }
-    }
+      searchDebounce = setTimeout(() => executeSearch(val), 250);
+    };
 
-    function startTimer() {
-      stopTimer();
-      timer = setInterval(() => {
-        if (player && player.getCurrentTime) {
-          const c = player.getCurrentTime() || 0, t = player.getDuration() || 0;
-          document.getElementById('current-time').textContent = formatTime(c);
-          document.getElementById('total-duration').textContent = formatTime(t);
-          if (t > 0) document.getElementById('progress-bar').value = (c / t) * 100;
-        }
-      }, 1000);
-    }
-
-    function stopTimer() { if (timer) clearInterval(timer); }
-    function formatTime(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
-
-    // BÚSQUEDA BINDINGS
-    const searchInputs = [document.getElementById('mobile-search-input'), document.getElementById('desktop-search-input')];
-    searchInputs.forEach(input => {
-      if(input) {
-        input.oninput = (e) => {
-          clearTimeout(window.sTimer);
-          window.sTimer = setTimeout(() => searchMusic(e.target.value.trim()), 400);
-        }
-      }
-    });
-
-    async function searchMusic(q) {
-      if (!q) return;
-      const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(q)}&type=video&videoCategoryId=10&key=${YOUTUBE_API_KEY}`);
-      const data = await res.json();
-      if (data.items) {
-        const songs = data.items.map(item => ({
+    async function executeSearch(q) {
+      const data = await fetchYouTube(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(q)}&type=video&videoCategoryId=10&key=${YOUTUBE_API_KEY}`);
+      if (data && data.items) {
+        queue = data.items.map(item => ({
           id: item.id.videoId,
           title: item.snippet.title,
           artist: item.snippet.channelTitle,
           thumb: item.snippet.thumbnails.high.url
         }));
-        queue = songs;
-        renderPlaylistSongs(queue);
+        
+        document.getElementById('search-categories').classList.add('hidden');
+        const container = document.getElementById('search-results-container');
+        container.classList.remove('hidden');
+        
+        const list = document.getElementById('search-results-list');
+        list.innerHTML = queue.map((song, i) => `
+          <div onclick="playIndex(${i})" class="flex items-center justify-between py-2 cursor-pointer active:bg-spotify-highlight/40 rounded px-1">
+            <div class="flex items-center gap-3 truncate">
+              <img src="${song.thumb}" class="w-11 h-11 rounded object-cover flex-shrink-0">
+              <div class="truncate">
+                <p class="font-semibold text-sm truncate text-white leading-tight">${song.title}</p>
+                <p class="text-xs text-spotify-subtext truncate mt-0.5">${song.artist}</p>
+              </div>
+            </div>
+          </div>
+        `).join('');
       }
+    }
+
+    async function fetchYouTube(url) {
+      if (cache.has(url)) return cache.get(url);
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        cache.set(url, data);
+        return data;
+      } catch (e) { return null; }
     }
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-      const target = document.getElementById(`view-${tab}`);
-      if (target) target.classList.remove('hidden');
+      document.getElementById(`view-${tab}`)?.classList.remove('hidden');
 
-      const isSearch = tab === 'search';
-      document.getElementById('desktop-search-bar').classList.toggle('hidden', !isSearch);
+      // Cambiar colores en barra móvil
+      ['home', 'search', 'library'].forEach(t => {
+        const btn = document.getElementById(`nav-${t}`);
+        if (btn) btn.className = `flex flex-col items-center ${t === tab ? 'text-white' : 'text-spotify-subtext'}`;
+      });
     }
   </script>
 </body>
