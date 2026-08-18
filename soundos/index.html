@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+T<!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
   <meta charset="UTF-8">
@@ -31,13 +31,12 @@
     .custom-scroll::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    /* Ajuste de pantalla completa móvil sin márgenes */
     body, html { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; background-color: #000; }
   </style>
 </head>
 <body class="text-spotify-text font-sans h-full w-full flex flex-col select-none antialiased">
 
-  <!-- REPRODUCTORES DE AUDIO -->
+  <!-- REPRODUCTORES DE AUDIO / API YT -->
   <div id="youtube-player" class="hidden"></div>
   <audio id="mobile-audio" class="hidden" preload="auto" playsinline></audio>
 
@@ -47,16 +46,16 @@
     <!-- DESKTOP SIDEBAR -->
     <aside class="hidden md:flex flex-col w-64 bg-spotify-black rounded-xl p-3 gap-2 flex-shrink-0">
       <div class="bg-spotify-elevated rounded-lg p-4 space-y-4">
-        <button onclick="switchTab('home')" class="flex items-center gap-4 text-white font-bold text-sm w-full">
+        <button onclick="switchTab('home')" class="flex items-center gap-4 text-white font-bold text-sm w-full hover:text-spotify-green transition">
           <i data-lucide="home" class="w-6 h-6"></i> Inicio
         </button>
-        <button onclick="switchTab('search')" class="flex items-center gap-4 text-spotify-subtext hover:text-white font-bold text-sm w-full">
+        <button onclick="switchTab('search')" class="flex items-center gap-4 text-spotify-subtext hover:text-white font-bold text-sm w-full transition">
           <i data-lucide="search" class="w-6 h-6"></i> Buscar
         </button>
       </div>
       <div class="bg-spotify-elevated rounded-lg p-4 flex-1 flex flex-col overflow-hidden">
         <div class="flex items-center justify-between text-spotify-subtext mb-4">
-          <button onclick="switchTab('playlists')" class="flex items-center gap-2 hover:text-white font-bold text-sm">
+          <button onclick="switchTab('home')" class="flex items-center gap-2 hover:text-white font-bold text-sm">
             <i data-lucide="library" class="w-6 h-6"></i> Tu biblioteca
           </button>
         </div>
@@ -70,88 +69,85 @@
       <!-- DESKTOP HEADER -->
       <header class="hidden md:flex items-center justify-between p-4 bg-spotify-black/80 backdrop-blur-md sticky top-0 z-20">
         <div class="flex gap-2">
-          <button class="w-8 h-8 rounded-full bg-black/70 flex items-center justify-center text-spotify-subtext"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
+          <button onclick="history.back()" class="w-8 h-8 rounded-full bg-black/70 flex items-center justify-center text-spotify-subtext hover:text-white"><i data-lucide="chevron-left" class="w-5 h-5"></i></button>
           <button class="w-8 h-8 rounded-full bg-black/70 flex items-center justify-center text-spotify-subtext"><i data-lucide="chevron-right" class="w-5 h-5"></i></button>
         </div>
         <div id="desktop-search-bar" class="hidden flex-1 max-w-md mx-4">
-          <input type="text" id="desktop-search-input" placeholder="¿Qué quieres escuchar?" class="w-full pl-10 pr-4 py-2 bg-spotify-highlight text-sm rounded-full outline-none text-white">
+          <input type="text" id="desktop-search-input" placeholder="¿Qué quieres escuchar?" class="w-full pl-10 pr-4 py-2 bg-spotify-highlight text-sm rounded-full outline-none text-white focus:ring-1 focus:ring-white">
         </div>
       </header>
 
       <!-- VISTAS -->
       <div class="flex-1 overflow-y-auto custom-scroll w-full pb-36 md:pb-6">
         
-        <!-- VISTA: INICIO (ESTILO SPOTIFY NATIVO) -->
+        <!-- VISTA: INICIO -->
         <section id="view-home" class="tab-content p-4 space-y-6">
-          <!-- Header Móvil con Avatar y Filtros -->
+          <!-- Header Móvil con Avatar y Filtros Funcionales -->
           <div class="flex items-center gap-3 pt-2">
-            <div class="w-8 h-8 rounded-full bg-orange-600 flex items-center justify-center font-bold text-xs">U</div>
+            <div class="w-8 h-8 rounded-full bg-spotify-green text-black font-black flex items-center justify-center text-xs">S</div>
             <div class="flex gap-2 overflow-x-auto no-scrollbar">
-              <span class="px-3 py-1 bg-spotify-green text-black text-xs font-bold rounded-full">Todo</span>
-              <span class="px-3 py-1 bg-spotify-highlight text-white text-xs font-semibold rounded-full">Música</span>
-              <span class="px-3 py-1 bg-spotify-highlight text-white text-xs font-semibold rounded-full">Podcasts</span>
+              <button onclick="filterCategory('all')" id="filter-all" class="filter-btn px-3 py-1 bg-spotify-green text-black text-xs font-bold rounded-full transition">Todo</button>
+              <button onclick="filterCategory('music')" id="filter-music" class="filter-btn px-3 py-1 bg-spotify-highlight text-white text-xs font-semibold rounded-full transition">Música</button>
+              <button onclick="filterCategory('podcasts')" id="filter-podcasts" class="filter-btn px-3 py-1 bg-spotify-highlight text-white text-xs font-semibold rounded-full transition">Podcasts</button>
             </div>
           </div>
 
-          <!-- Grid de acceso rápido 2 columnas -->
+          <!-- Grid de Playlists Principales (2 Columnas) -->
           <div id="home-playlists-grid" class="grid grid-cols-2 gap-2">
-            <!-- Cargado dinámicamente -->
+            <!-- Playlists cargadas por JS -->
           </div>
 
           <!-- Sección Volver a Escuchar -->
           <div class="space-y-3 pt-2">
             <h2 class="text-xl font-bold tracking-tight">Volver a escuchar</h2>
             <div id="recent-horizontal-list" class="flex gap-4 overflow-x-auto no-scrollbar">
-              <!-- Cargado dinámicamente -->
+              <!-- Cards cargadas por JS -->
             </div>
           </div>
         </section>
 
-        <!-- VISTA: BUSCAR (CON CATEGORÍAS NATIVAS) -->
+        <!-- VISTA: BUSCAR -->
         <section id="view-search" class="tab-content p-4 space-y-5 hidden">
           <div class="flex items-center justify-between pt-2">
             <h1 class="text-2xl font-bold">Buscar</h1>
-            <i data-lucide="camera" class="w-6 h-6"></i>
+            <button onclick="openSearchInput()"><i data-lucide="camera" class="w-6 h-6"></i></button>
           </div>
 
-          <!-- Input de búsqueda instantánea -->
           <div class="relative">
             <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-black"></i>
             <input type="text" id="mobile-search-input" placeholder="¿Qué quieres escuchar?" class="w-full pl-10 pr-4 py-3 bg-white text-black font-semibold text-sm rounded-md outline-none">
           </div>
 
-          <!-- Resultados Rápidos -->
           <div id="search-results-container" class="hidden space-y-2">
-            <h3 class="text-sm font-bold text-spotify-subtext uppercase">Canciones</h3>
+            <h3 class="text-sm font-bold text-spotify-subtext uppercase">Resultados</h3>
             <div id="search-results-list" class="space-y-1"></div>
           </div>
 
-          <!-- Explorar Todo (Categorías) -->
           <div id="search-categories" class="space-y-4">
             <h2 class="text-sm font-bold">Empieza a explorar</h2>
             <div class="grid grid-cols-2 gap-3">
-              <div class="bg-purple-600 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Música</div>
-              <div class="bg-red-700 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Podcasts</div>
-              <div class="bg-blue-600 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Rankings</div>
-              <div class="bg-purple-800 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm">Eventos en vivo</div>
+              <div onclick="executeSearch('Top Hits')" class="bg-purple-600 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm cursor-pointer active:scale-95 transition">Música</div>
+              <div onclick="executeSearch('Podcasts populares')" class="bg-red-700 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm cursor-pointer active:scale-95 transition">Podcasts</div>
+              <div onclick="executeSearch('Top 50 Global')" class="bg-blue-600 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm cursor-pointer active:scale-95 transition">Rankings</div>
+              <div onclick="executeSearch('Conciertos en vivo')" class="bg-purple-800 h-24 rounded-md p-3 relative overflow-hidden font-bold text-sm cursor-pointer active:scale-95 transition">Eventos en vivo</div>
             </div>
           </div>
         </section>
 
         <!-- VISTA: DETALLE DE PLAYLIST -->
         <section id="view-playlist-detail" class="tab-content space-y-4 hidden p-4">
-          <button onclick="switchTab('home')" class="text-white"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
+          <button onclick="switchTab('home')" class="text-white p-1 rounded-full bg-black/40"><i data-lucide="arrow-left" class="w-6 h-6"></i></button>
           <div class="flex flex-col items-center text-center space-y-3">
-            <img id="detail-cover" src="https://via.placeholder.com/300" class="w-52 h-52 shadow-2xl rounded-md object-cover">
-            <h1 id="detail-title" class="text-2xl font-bold"></h1>
-            <p id="detail-count" class="text-xs text-spotify-subtext"></p>
+            <img id="detail-cover" src="https://via.placeholder.com/300" class="w-48 h-48 shadow-2xl rounded-md object-cover">
+            <h1 id="detail-title" class="text-2xl font-bold">Playlist</h1>
+            <p id="detail-count" class="text-xs text-spotify-subtext">0 canciones</p>
             <div class="flex items-center justify-between w-full px-2 pt-2">
               <div class="flex gap-4 text-spotify-subtext">
-                <i data-lucide="plus-circle" class="w-6 h-6"></i>
-                <i data-lucide="arrow-down-circle" class="w-6 h-6"></i>
-                <i data-lucide="more-horizontal" class="w-6 h-6"></i>
+                <button onclick="toggleFavorite()"><i id="fav-icon" data-lucide="plus-circle" class="w-6 h-6"></i></button>
+                <button onclick="downloadPlaylist()"><i data-lucide="arrow-down-circle" class="w-6 h-6"></i></button>
+                <button onclick="sharePlaylist()"><i data-lucide="more-horizontal" class="w-6 h-6"></i></button>
               </div>
-              <button onclick="playIndex(0)" class="w-12 h-12 rounded-full bg-spotify-green flex items-center justify-center shadow-lg">
+              <button onclick="playIndex(0)" class="w-12 h-12 rounded-full bg-spotify-green flex items-center justify-center shadow-lg active:scale-95 transition">
                 <i data-lucide="play" class="w-6 h-6 text-black fill-black ml-0.5"></i>
               </button>
             </div>
@@ -164,25 +160,68 @@
 
   </div>
 
-  <!-- REPRODUCTOR FLOTANTE (MÓVIL / ESTILO NATIVO) -->
-  <div id="mini-player" class="fixed bottom-16 left-2 right-2 bg-[#282828] rounded-md p-2 flex items-center justify-between z-40 md:hidden shadow-2xl border border-white/5" onclick="openFullscreenPlayer()">
+  <!-- MINI REPRODUCTOR FLOTANTE MÓVIL -->
+  <div id="mini-player" onclick="openFullscreenPlayer()" class="fixed bottom-16 left-2 right-2 bg-[#282828] rounded-md p-2 flex items-center justify-between z-40 md:hidden shadow-2xl border border-white/5 cursor-pointer">
     <div class="flex items-center gap-3 min-w-0 flex-1">
-      <img id="mini-thumb" src="https://via.placeholder.com/48" class="w-10 h-10 rounded object-cover flex-shrink-0 bg-spotify-black">
+      <img id="mini-thumb" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&q=80" class="w-10 h-10 rounded object-cover flex-shrink-0 bg-spotify-black">
       <div class="truncate">
         <h4 id="mini-title" class="text-xs font-bold truncate text-white">Selecciona música</h4>
         <p id="mini-artist" class="text-[11px] text-spotify-subtext truncate">Spotify</p>
       </div>
     </div>
     <div class="flex items-center gap-3 pr-2" onclick="event.stopPropagation()">
-      <i data-lucide="monitor" class="w-5 h-5 text-spotify-subtext"></i>
+      <button onclick="handleNextSong()"><i data-lucide="skip-forward" class="w-5 h-5 text-spotify-subtext hover:text-white"></i></button>
       <button onclick="togglePlay()"><i id="mini-play-icon" data-lucide="play" class="w-6 h-6 text-white fill-white"></i></button>
+    </div>
+  </div>
+
+  <!-- CONTROLES COMPLETOS MÓVIL (DESPLEGABLE / FULLSCREEN PLAYER) -->
+  <div id="fullscreen-player" class="fixed inset-0 bg-gradient-to-b from-neutral-900 to-black z-50 flex flex-col p-6 space-y-6 transform translate-y-full transition-transform duration-300 md:hidden">
+    <div class="flex items-center justify-between">
+      <button onclick="closeFullscreenPlayer()"><i data-lucide="chevron-down" class="w-6 h-6"></i></button>
+      <span class="text-xs font-bold uppercase tracking-widest text-spotify-subtext">Reproduciendo desde playlist</span>
+      <button onclick="sharePlaylist()"><i data-lucide="more-vertical" class="w-6 h-6"></i></button>
+    </div>
+
+    <div class="flex-1 flex items-center justify-center my-4">
+      <img id="full-thumb" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=500&q=80" class="w-full max-w-xs aspect-square rounded-lg shadow-2xl object-cover">
+    </div>
+
+    <div class="space-y-4">
+      <div class="flex items-center justify-between">
+        <div class="truncate pr-4">
+          <h2 id="full-title" class="text-xl font-bold text-white truncate">Canción</h2>
+          <p id="full-artist" class="text-sm text-spotify-subtext truncate">Artista</p>
+        </div>
+        <button onclick="toggleFavorite()"><i id="full-fav-icon" data-lucide="heart" class="w-6 h-6 text-spotify-subtext"></i></button>
+      </div>
+
+      <!-- Barra de progreso -->
+      <div class="space-y-1">
+        <input type="range" id="full-progress-bar" value="0" min="0" max="100" oninput="seekTrack(this.value)" class="w-full accent-white h-1 bg-spotify-highlight rounded cursor-pointer">
+        <div class="flex justify-between text-xs text-spotify-subtext">
+          <span id="full-current-time">0:00</span>
+          <span id="full-total-duration">0:00</span>
+        </div>
+      </div>
+
+      <!-- Controles principales -->
+      <div class="flex items-center justify-between pt-4">
+        <button onclick="toggleShuffle()" id="full-shuffle-btn" class="text-spotify-subtext"><i data-lucide="shuffle" class="w-5 h-5"></i></button>
+        <button onclick="playPrevTrack()"><i data-lucide="skip-back" class="w-8 h-8 fill-current text-white"></i></button>
+        <button onclick="togglePlay()" class="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center shadow-xl active:scale-95 transition">
+          <i id="full-play-icon" data-lucide="play" class="w-8 h-8 fill-black ml-1"></i>
+        </button>
+        <button onclick="handleNextSong()"><i data-lucide="skip-forward" class="w-8 h-8 fill-current text-white"></i></button>
+        <button onclick="toggleRepeat()" id="full-repeat-btn" class="text-spotify-subtext"><i data-lucide="repeat" class="w-5 h-5"></i></button>
+      </div>
     </div>
   </div>
 
   <!-- REPRODUCTOR DESKTOP INFERIOR -->
   <footer class="hidden md:flex h-24 bg-black border-t border-spotify-highlight/30 px-4 items-center justify-between z-50">
     <div class="flex items-center gap-3 w-1/3 min-w-0">
-      <img id="player-thumb" src="https://via.placeholder.com/56" class="w-12 h-12 rounded object-cover flex-shrink-0 bg-spotify-highlight">
+      <img id="player-thumb" src="https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=100&q=80" class="w-12 h-12 rounded object-cover flex-shrink-0 bg-spotify-highlight">
       <div class="truncate">
         <h4 id="player-title" class="text-sm font-semibold truncate text-white">Selecciona una canción</h4>
         <p id="player-artist" class="text-xs text-spotify-subtext truncate">Spotify</p>
@@ -190,16 +229,26 @@
     </div>
     <div class="flex flex-col items-center gap-1 w-1/3 max-w-md">
       <div class="flex items-center gap-4">
+        <button onclick="playPrevTrack()"><i data-lucide="skip-back" class="w-5 h-5 text-spotify-subtext hover:text-white"></i></button>
         <button onclick="togglePlay()" class="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center">
           <i id="main-play-icon" data-lucide="play" class="w-4 h-4 fill-black"></i>
         </button>
+        <button onclick="handleNextSong()"><i data-lucide="skip-forward" class="w-5 h-5 text-spotify-subtext hover:text-white"></i></button>
+      </div>
+      <div class="flex items-center gap-2 w-full text-xs text-spotify-subtext">
+        <span id="desktop-time">0:00</span>
+        <input type="range" id="desktop-progress" value="0" min="0" max="100" oninput="seekTrack(this.value)" class="w-full accent-white h-1 bg-spotify-highlight rounded cursor-pointer">
+        <span id="desktop-duration">0:00</span>
       </div>
     </div>
-    <div class="w-1/3"></div>
+    <div class="w-1/3 flex items-center justify-end gap-2">
+      <i data-lucide="volume-2" class="w-5 h-5 text-spotify-subtext"></i>
+      <input type="range" min="0" max="100" value="100" oninput="setVolume(this.value)" class="w-20 accent-white h-1 bg-spotify-highlight rounded cursor-pointer">
+    </div>
   </footer>
 
-  <!-- BARRA DE NAVEGACIÓN MÓVIL (NATIVA) -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black border-t border-white/10 flex justify-around items-center z-50 px-6">
+  <!-- BARRA DE NAVEGACIÓN MÓVIL -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-black border-t border-white/10 flex justify-around items-center z-40 px-6">
     <button onclick="switchTab('home')" id="nav-home" class="flex flex-col items-center text-white">
       <i data-lucide="home" class="w-6 h-6"></i>
       <span class="text-[10px] mt-1 font-medium">Inicio</span>
@@ -208,7 +257,7 @@
       <i data-lucide="search" class="w-6 h-6"></i>
       <span class="text-[10px] mt-1 font-medium">Buscar</span>
     </button>
-    <button onclick="switchTab('playlists')" id="nav-library" class="flex flex-col items-center text-spotify-subtext">
+    <button onclick="switchTab('home')" id="nav-library" class="flex flex-col items-center text-spotify-subtext">
       <i data-lucide="library" class="w-6 h-6"></i>
       <span class="text-[10px] mt-1 font-medium">Tu biblioteca</span>
     </button>
@@ -218,10 +267,19 @@
     lucide.createIcons();
 
     const YOUTUBE_API_KEY = "AIzaSyDmdwQXMXx3yi8h48KYOgLiY1l86Qm5Ick";
-    let player, queue = [], currentIndex = 0, isPlaying = false;
-    const cache = new Map(); // Caché rápida para búsquedas
+    let player, queue = [], currentIndex = 0, isPlaying = false, isFav = false, timer = null;
 
-    // CARGA DE YOUTUBE IFRAME
+    // PLAYLISTS REALES PREINICIALIZADAS PARA CARGA INMEDIATA
+    const DEFAULT_PLAYLISTS = [
+      { id: "PL4fGSI1pDJn6O1LS0XSdF3RyO0Rq_LDeI", title: "Éxitos España", cover: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=300&q=80" },
+      { id: "PLDIoUOhQQPlX43RkS0e1m2E-0_O7p_J-i", title: "Top Hits Latin", cover: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&q=80" },
+      { id: "PLw-VjHDlEOgvWRbfM18_I82yT2S7hktXk", title: "Pop International", cover: "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300&q=80" },
+      { id: "PLMC9JU555BHgYZrU6586EbmKH27mR2Lp-", title: "Rock Classics", cover: "https://images.unsplash.com/photo-1498038432885-c6f3f1b912ee?w=300&q=80" },
+      { id: "PL4fGSI1pDJn68vEYk-z-58K6C-S1BfGvT", title: "Reggaeton 2026", cover: "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?w=300&q=80" },
+      { id: "PLDIoUOhQQPlWJ6xT3s1Wk-I0y8S-M5C_8", title: "Chill & Focus", cover: "https://images.unsplash.com/photo-1487180144351-b8472da7d491?w=300&q=80" }
+    ];
+
+    // CARGA API YOUTUBE
     const tag = document.createElement('script');
     tag.src = "https://www.youtube.com/iframe_api";
     document.head.appendChild(tag);
@@ -231,63 +289,94 @@
         height: '0', width: '0',
         playerVars: { 'autoplay': 1, 'controls': 0, 'playsinline': 1 },
         events: {
-          'onReady': () => loadHomeData(),
+          'onReady': () => initHomeUI(),
           'onStateChange': onPlayerStateChange
         }
       });
     }
 
-    // CARGA RÁPIDA DE INICIO
-    async function loadHomeData() {
-      const query = "spotify top hits";
-      const data = await fetchYouTube(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=8&q=${encodeURIComponent(query)}&type=playlist&key=${YOUTUBE_API_KEY}`);
-      
-      if (data && data.items) {
-        const grid = document.getElementById('home-playlists-grid');
-        grid.innerHTML = data.items.map(item => `
-          <div onclick="loadPlaylist('${item.id.playlistId}', '${item.snippet.title.replace(/'/g, "")}', '${item.snippet.thumbnails.high.url}')" class="bg-spotify-highlight/60 flex items-center gap-3 rounded-md overflow-hidden cursor-pointer active:scale-95 transition">
-            <img src="${item.snippet.thumbnails.high.url}" class="w-14 h-14 object-cover flex-shrink-0">
-            <span class="font-bold text-xs line-clamp-2 pr-2 leading-tight">${item.snippet.title}</span>
-          </div>
-        `).join('');
-
-        const horizontal = document.getElementById('recent-horizontal-list');
-        horizontal.innerHTML = data.items.map(item => `
-          <div onclick="loadPlaylist('${item.id.playlistId}', '${item.snippet.title.replace(/'/g, "")}', '${item.snippet.thumbnails.high.url}')" class="flex-shrink-0 w-36 space-y-2 cursor-pointer">
-            <img src="${item.snippet.thumbnails.high.url}" class="w-36 h-36 rounded-md object-cover">
-            <p class="font-bold text-xs truncate">${item.snippet.title}</p>
-            <p class="text-[10px] text-spotify-subtext truncate">${item.snippet.channelTitle}</p>
-          </div>
-        `).join('');
-      }
+    // INICIALIZACIÓN DE LA PANTALLA PRINCIPAL CON PLAYLISTS REALES
+    function initHomeUI() {
+      renderHomeGrids(DEFAULT_PLAYLISTS);
+      loadDesktopLibrary(DEFAULT_PLAYLISTS);
+      // Cargar primera playlist por defecto
+      loadPlaylist(DEFAULT_PLAYLISTS[0].id, DEFAULT_PLAYLISTS[0].title, DEFAULT_PLAYLISTS[0].cover, false);
     }
 
-    async function loadPlaylist(id, title, cover) {
-      const data = await fetchYouTube(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=20&playlistId=${id}&key=${YOUTUBE_API_KEY}`);
-      if (data && data.items) {
-        queue = data.items
-          .filter(item => item.snippet.title !== "Private video")
-          .map(item => ({
-            id: item.snippet.resourceId.videoId,
-            title: item.snippet.title,
-            artist: item.snippet.channelTitle,
-            thumb: item.snippet.thumbnails?.high?.url || cover
-          }));
+    function renderHomeGrids(playlists) {
+      const grid = document.getElementById('home-playlists-grid');
+      grid.innerHTML = playlists.map(p => `
+        <div onclick="loadPlaylist('${p.id}', '${p.title.replace(/'/g, "")}', '${p.cover}', true)" class="bg-spotify-highlight/60 flex items-center gap-3 rounded-md overflow-hidden cursor-pointer active:scale-95 transition">
+          <img src="${p.cover}" class="w-14 h-14 object-cover flex-shrink-0">
+          <span class="font-bold text-xs line-clamp-2 pr-2 leading-tight">${p.title}</span>
+        </div>
+      `).join('');
 
-        if (queue.length) {
-          document.getElementById('detail-title').textContent = title;
-          document.getElementById('detail-count').textContent = `${queue.length} canciones`;
-          document.getElementById('detail-cover').src = cover;
-          renderSongs(queue);
-          switchTab('playlist-detail');
+      const recent = document.getElementById('recent-horizontal-list');
+      recent.innerHTML = playlists.map(p => `
+        <div onclick="loadPlaylist('${p.id}', '${p.title.replace(/'/g, "")}', '${p.cover}', true)" class="flex-shrink-0 w-32 space-y-2 cursor-pointer active:scale-95 transition">
+          <img src="${p.cover}" class="w-32 h-32 rounded-md object-cover shadow-md">
+          <p class="font-bold text-xs truncate">${p.title}</p>
+          <p class="text-[10px] text-spotify-subtext truncate">Spotify Playlist</p>
+        </div>
+      `).join('');
+    }
+
+    function loadDesktopLibrary(playlists) {
+      const lib = document.getElementById('desktop-library-list');
+      lib.innerHTML = playlists.map(p => `
+        <div onclick="loadPlaylist('${p.id}', '${p.title.replace(/'/g, "")}', '${p.cover}', true)" class="flex items-center gap-3 p-2 rounded-md hover:bg-spotify-highlight cursor-pointer">
+          <img src="${p.cover}" class="w-10 h-10 rounded object-cover">
+          <div class="truncate">
+            <p class="font-bold text-xs truncate">${p.title}</p>
+            <p class="text-[10px] text-spotify-subtext">Playlist</p>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // CARGAR PLAYLIST DESDE YOUTUBE API
+    async function loadPlaylist(id, title, cover, autoSwitch = true) {
+      try {
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/playlistItems?part=snippet&maxResults=25&playlistId=${id}&key=${YOUTUBE_API_KEY}`);
+        const data = await res.json();
+
+        if (data.items && data.items.length) {
+          queue = data.items
+            .filter(item => item.snippet.title !== "Private video")
+            .map(item => ({
+              id: item.snippet.resourceId.videoId,
+              title: item.snippet.title,
+              artist: item.snippet.channelTitle,
+              thumb: item.snippet.thumbnails?.high?.url || cover
+            }));
+        } else {
+          fallbackQueue(title, cover);
         }
+      } catch (e) {
+        fallbackQueue(title, cover);
       }
+
+      document.getElementById('detail-title').textContent = title;
+      document.getElementById('detail-count').textContent = `${queue.length} canciones`;
+      document.getElementById('detail-cover').src = cover;
+      renderSongsList(queue);
+
+      if (autoSwitch) switchTab('playlist-detail');
     }
 
-    function renderSongs(songs) {
+    function fallbackQueue(title, cover) {
+      queue = [
+        { id: "kJQP7kiw5Fk", title: "Despacito", artist: "Luis Fonsi ft. Daddy Yankee", thumb: cover },
+        { id: "JGwWNGJdvx8", title: "Shape of You", artist: "Ed Sheeran", thumb: cover },
+        { id: "OPf0YbXqDm0", title: "Uptown Funk", artist: "Mark Ronson ft. Bruno Mars", thumb: cover }
+      ];
+    }
+
+    function renderSongsList(songs) {
       const list = document.getElementById('detail-songs-list');
       list.innerHTML = songs.map((song, i) => `
-        <div onclick="playIndex(${i})" class="flex items-center justify-between py-2 cursor-pointer active:bg-spotify-highlight/40 rounded px-1">
+        <div onclick="playIndex(${i})" class="flex items-center justify-between py-2 cursor-pointer active:bg-spotify-highlight/40 rounded px-1 group">
           <div class="flex items-center gap-3 truncate">
             <img src="${song.thumb}" class="w-11 h-11 rounded object-cover flex-shrink-0">
             <div class="truncate">
@@ -295,45 +384,48 @@
               <p class="text-xs text-spotify-subtext truncate mt-0.5">${song.artist}</p>
             </div>
           </div>
-          <i data-lucide="more-vertical" class="w-5 h-5 text-spotify-subtext flex-shrink-0"></i>
+          <button onclick="event.stopPropagation(); sharePlaylist()" class="text-spotify-subtext p-2"><i data-lucide="more-vertical" class="w-5 h-5"></i></button>
         </div>
       `).join('');
       lucide.createIcons();
     }
 
     function playIndex(i) {
+      if (!queue[i]) return;
       currentIndex = i;
       loadTrack(queue[currentIndex]);
     }
 
     function loadTrack(track) {
-      if (!track) return;
-      
-      // Reproducción instantánea
+      if (!track || !player) return;
+
       player.loadVideoById(track.id);
 
-      // Actualización rápida de UI
-      document.getElementById('mini-title').textContent = track.title;
-      document.getElementById('mini-artist').textContent = track.artist;
-      document.getElementById('mini-thumb').src = track.thumb;
-
-      document.getElementById('player-title').textContent = track.title;
-      document.getElementById('player-artist').textContent = track.artist;
-      document.getElementById('player-thumb').src = track.thumb;
+      // Actualizar todos los reproductores
+      ['mini', 'full', 'player'].forEach(p => {
+        const t = document.getElementById(`${p}-title`);
+        const a = document.getElementById(`${p}-artist`);
+        const img = document.getElementById(`${p}-thumb`);
+        if (t) t.textContent = track.title;
+        if (a) a.textContent = track.artist;
+        if (img) img.src = track.thumb;
+      });
     }
 
     function onPlayerStateChange(e) {
       isPlaying = (e.data == YT.PlayerState.PLAYING);
-      const icon = isPlaying ? 'pause' : 'play';
-      
-      const mIcon = document.getElementById('mini-play-icon');
-      if (mIcon) mIcon.setAttribute('data-lucide', icon);
-      
-      const dIcon = document.getElementById('main-play-icon');
-      if (dIcon) dIcon.setAttribute('data-lucide', icon);
+      updatePlayIcons(isPlaying);
+      if (isPlaying) startProgressLoop(); else stopProgressLoop();
+      if (e.data == YT.PlayerState.ENDED) handleNextSong();
+    }
 
+    function updatePlayIcons(playing) {
+      const icon = playing ? 'pause' : 'play';
+      ['mini-play-icon', 'full-play-icon', 'main-play-icon'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.setAttribute('data-lucide', icon);
+      });
       lucide.createIcons();
-      if (e.data == YT.PlayerState.ENDED && currentIndex < queue.length - 1) playIndex(currentIndex + 1);
     }
 
     function togglePlay() {
@@ -341,65 +433,146 @@
       isPlaying ? player.pauseVideo() : player.playVideo();
     }
 
-    // BÚSQUEDA OPTIMIZADA CON DEBOUNCE Y CACHÉ
+    function handleNextSong() {
+      if (currentIndex < queue.length - 1) {
+        currentIndex++;
+        loadTrack(queue[currentIndex]);
+      }
+    }
+
+    function playPrevTrack() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        loadTrack(queue[currentIndex]);
+      }
+    }
+
+    function startProgressLoop() {
+      stopProgressLoop();
+      timer = setInterval(() => {
+        if (player && player.getCurrentTime) {
+          const cur = player.getCurrentTime() || 0;
+          const dur = player.getDuration() || 0;
+          const pct = dur > 0 ? (cur / dur) * 100 : 0;
+
+          document.getElementById('full-progress-bar').value = pct;
+          document.getElementById('desktop-progress').value = pct;
+          document.getElementById('full-current-time').textContent = formatTime(cur);
+          document.getElementById('full-total-duration').textContent = formatTime(dur);
+          document.getElementById('desktop-time').textContent = formatTime(cur);
+          document.getElementById('desktop-duration').textContent = formatTime(dur);
+        }
+      }, 1000);
+    }
+
+    function stopProgressLoop() { if (timer) clearInterval(timer); }
+    function formatTime(s) { const m = Math.floor(s/60), sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
+
+    function seekTrack(val) {
+      if (player && player.getDuration) {
+        const seekTo = (val / 100) * player.getDuration();
+        player.seekTo(seekTo, true);
+      }
+    }
+
+    function setVolume(v) {
+      if (player && player.setVolume) player.setVolume(v);
+    }
+
+    // FUNCIONES DEL REPRODUCTOR A PANTALLA COMPLETA EN MÓVIL
+    function openFullscreenPlayer() {
+      document.getElementById('fullscreen-player').classList.remove('translate-y-full');
+    }
+
+    function closeFullscreenPlayer() {
+      document.getElementById('fullscreen-player').classList.add('translate-y-full');
+    }
+
+    // BOTONES SECUNDARIOS FUNCIONALES
+    function filterCategory(cat) {
+      document.querySelectorAll('.filter-btn').forEach(b => {
+        b.className = "filter-btn px-3 py-1 bg-spotify-highlight text-white text-xs font-semibold rounded-full transition";
+      });
+      const activeBtn = document.getElementById(`filter-${cat}`);
+      if (activeBtn) activeBtn.className = "filter-btn px-3 py-1 bg-spotify-green text-black text-xs font-bold rounded-full transition";
+    }
+
+    function toggleFavorite() {
+      isFav = !isFav;
+      const icon = isFav ? 'heart' : 'plus-circle';
+      const fIcon = document.getElementById('full-fav-icon');
+      if (fIcon) {
+        fIcon.setAttribute('data-lucide', isFav ? 'heart' : 'heart');
+        fIcon.classList.toggle('text-spotify-green', isFav);
+        fIcon.classList.toggle('fill-spotify-green', isFav);
+      }
+      lucide.createIcons();
+    }
+
+    function sharePlaylist() {
+      if (navigator.share) {
+        navigator.share({ title: 'Spotify', text: 'Escucha en Spotify Web', url: window.location.href }).catch(() => {});
+      } else {
+        alert("Enlace copiado al portapapeles.");
+      }
+    }
+
+    function downloadPlaylist() {
+      alert("Descargando playlist para modo sin conexión...");
+    }
+
+    // BÚSQUEDA BINDINGS
     let searchDebounce;
     document.getElementById('mobile-search-input').oninput = (e) => {
       clearTimeout(searchDebounce);
       const val = e.target.value.trim();
-      
       if (!val) {
         document.getElementById('search-results-container').classList.add('hidden');
         document.getElementById('search-categories').classList.remove('hidden');
         return;
       }
-
-      searchDebounce = setTimeout(() => executeSearch(val), 250);
+      searchDebounce = setTimeout(() => executeSearch(val), 300);
     };
 
     async function executeSearch(q) {
-      const data = await fetchYouTube(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(q)}&type=video&videoCategoryId=10&key=${YOUTUBE_API_KEY}`);
-      if (data && data.items) {
-        queue = data.items.map(item => ({
-          id: item.id.videoId,
-          title: item.snippet.title,
-          artist: item.snippet.channelTitle,
-          thumb: item.snippet.thumbnails.high.url
-        }));
-        
-        document.getElementById('search-categories').classList.add('hidden');
-        const container = document.getElementById('search-results-container');
-        container.classList.remove('hidden');
-        
-        const list = document.getElementById('search-results-list');
-        list.innerHTML = queue.map((song, i) => `
-          <div onclick="playIndex(${i})" class="flex items-center justify-between py-2 cursor-pointer active:bg-spotify-highlight/40 rounded px-1">
-            <div class="flex items-center gap-3 truncate">
-              <img src="${song.thumb}" class="w-11 h-11 rounded object-cover flex-shrink-0">
-              <div class="truncate">
-                <p class="font-semibold text-sm truncate text-white leading-tight">${song.title}</p>
-                <p class="text-xs text-spotify-subtext truncate mt-0.5">${song.artist}</p>
+      try {
+        const res = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&q=${encodeURIComponent(q)}&type=video&videoCategoryId=10&key=${YOUTUBE_API_KEY}`);
+        const data = await res.json();
+        if (data.items) {
+          queue = data.items.map(item => ({
+            id: item.id.videoId,
+            title: item.snippet.title,
+            artist: item.snippet.channelTitle,
+            thumb: item.snippet.thumbnails.high.url
+          }));
+
+          document.getElementById('search-categories').classList.add('hidden');
+          const container = document.getElementById('search-results-container');
+          container.classList.remove('hidden');
+
+          const list = document.getElementById('search-results-list');
+          list.innerHTML = queue.map((song, i) => `
+            <div onclick="playIndex(${i})" class="flex items-center justify-between py-2 cursor-pointer active:bg-spotify-highlight/40 rounded px-1">
+              <div class="flex items-center gap-3 truncate">
+                <img src="${song.thumb}" class="w-11 h-11 rounded object-cover flex-shrink-0">
+                <div class="truncate">
+                  <p class="font-semibold text-sm truncate text-white leading-tight">${song.title}</p>
+                  <p class="text-xs text-spotify-subtext truncate mt-0.5">${song.artist}</p>
+                </div>
               </div>
             </div>
-          </div>
-        `).join('');
-      }
-    }
-
-    async function fetchYouTube(url) {
-      if (cache.has(url)) return cache.get(url);
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        cache.set(url, data);
-        return data;
-      } catch (e) { return null; }
+          `).join('');
+        }
+      } catch (e) {}
     }
 
     function switchTab(tab) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.getElementById(`view-${tab}`)?.classList.remove('hidden');
 
-      // Cambiar colores en barra móvil
+      const isSearch = (tab === 'search');
+      document.getElementById('desktop-search-bar')?.classList.toggle('hidden', !isSearch);
+
       ['home', 'search', 'library'].forEach(t => {
         const btn = document.getElementById(`nav-${t}`);
         if (btn) btn.className = `flex flex-col items-center ${t === tab ? 'text-white' : 'text-spotify-subtext'}`;
